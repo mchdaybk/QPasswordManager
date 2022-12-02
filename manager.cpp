@@ -19,6 +19,7 @@ bool special(QString);
 bool number(QString);
 
 
+
 manager::manager(QWidget *parent) :
     QDialog(parent),
     ui(new Ui::manager)
