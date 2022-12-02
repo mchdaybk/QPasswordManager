@@ -2,6 +2,8 @@
 #include "ui_login.h"
 #include <QTableWidget>
 #include <QTableWidgetItem>
+#include "manager.h"
+
 
 login::login(QWidget *parent)
     : QMainWindow(parent)
