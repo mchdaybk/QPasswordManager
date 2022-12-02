@@ -17,6 +17,9 @@ bool special_number(QString);
 bool letter(QString);
 bool special(QString);
 bool number(QString);
+bool a;
+bool b;
+
 
 
 manager::manager(QWidget *parent) :
