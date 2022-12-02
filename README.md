@@ -1,2 +1,0 @@
-# QPasswordManager
-QPasswordManager
