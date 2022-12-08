@@ -9,6 +9,7 @@ CONFIG += c++17
 #DEFINES += QT_DISABLE_DEPRECATED_BEFORE=0x060000    # disables all the APIs deprecated before Qt 6.0.0
 
 SOURCES += \
+    createuser.cpp \
     main.cpp \
     login.cpp \
     manager.cpp \
@@ -17,11 +18,13 @@ SOURCES += \
 HEADERS += \
     ../../../../OpenSSL-Win64/include/openssl/conf.h \
     ../../../../OpenSSL-Win64/include/openssl/evp.h \
+    createuser.h \
     login.h \
     manager.h \
     passwdsource.h
 
 FORMS += \
+    createuser.ui \
     login.ui \
     manager.ui \
     passwdsource.ui
