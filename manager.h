@@ -4,6 +4,7 @@
 #include "openssl/evp.h"
 #include "openssl/conf.h"
 #include "passwdsource.h"
+#include "userdelete.h"
 #include <QDialog>
 #include <QString>
 #include <QCheckBox>
@@ -77,6 +78,8 @@ private slots:
 
     void cellClicked();
 
+    void on_pushButton_deleteUser_clicked();
+
 private:
     Ui::manager *ui;
 };
@@ -85,11 +88,11 @@ private:
 class EncryptDecrypt
 {
 public:
-    unsigned char* key = (unsigned char*)"0123456789abcdef";      //disaridan olusturup veriyoruz..sifreleme icin anahtar
+    //unsigned char* key = (unsigned char*)"0123456789abcdef";      //disaridan olusturup veriyoruz..sifreleme icin anahtar
     int cipher_len = 0;
     unsigned char cipher[64];
 
-    QString encrypt_it(QString password)
+    QString encrypt_it(QString password, unsigned char* key)
     {
         QString encrypted_text;
         unsigned char* text = (unsigned char*)StringToChar(password);
@@ -111,7 +114,7 @@ getirilip ilgili yerde ekrana bastiriliyor..
 SON DURUMDA BU CLASS FONK'LARI DUZGUN CALISMAKTADIR..
     */
 
-    QString decrypt_it(QString crypt_password, int cipher_len)
+    QString decrypt_it(QString crypt_password, int cipher_len, unsigned char* key)
     {
         QString decrypted_string;
         unsigned char decrypted[64];    //yeni 64'luk char array, duz parola..
@@ -130,6 +133,28 @@ SON DURUMDA BU CLASS FONK'LARI DUZGUN CALISMAKTADIR..
         }
         return decrypted_string;    //cozulmus string bunun icinde...
     }
+
+    QString getRandomKey()
+    {
+        const int randomStringLength = 16;      //key length
+        QString randomKey;
+        for(int i=0; i<randomStringLength; ++i)
+        {
+            int index = QRandomGenerator::global()->bounded(0, Characters.length());
+            QChar nextChar = Characters.at(index);
+            randomKey.append(nextChar);
+        }
+        return randomKey;      //returns unsigned char* of random generated key.
+    }
+
+    unsigned char* getMasterKey()
+    {
+        return masterKey;
+    }
+
+private:
+    unsigned char* masterKey = (unsigned char*)"abcdef0123456789";
+    const QString Characters = "a0bc1de2fg3hi4jk5lm6no7pr8st9vyqzw";
 };
 
 #endif // MANAGER_H
