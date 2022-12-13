@@ -3,6 +3,8 @@
 #include <QItemSelectionModel>
 #include <QAbstractItemModel>
 #include <QDialog>
+#include "login.h"
+#include "userdelete.h"
 
 
 int deneme();
@@ -35,10 +37,10 @@ manager::manager(QWidget *parent) :
     ui->comboBox->addItem("19", 19);
     ui->comboBox->addItem("20", 20);
 
-    if(!connOpen())                                                     //database kontrolu saglaniyor..
-        ui->label_db_info->setText("Failed to open the database");
-    else
-        ui->label_db_info->setText("Succesfuly connected to database..");
+//    if(!connOpen())                                                     //database kontrolu saglaniyor..
+//        ui->label_db_info->setText("Failed to open the database");
+//    else
+//        ui->label_db_info->setText("Succesfuly connected to database..");
 
     connect(ui->tableWidget, &QTableWidget::cellClicked, this, &manager::cellClicked);
 }
@@ -46,12 +48,9 @@ manager::manager(QWidget *parent) :
 
 void manager::cellClicked()
 {
-    int id = 0;
-    int row = 0;
-    int column = 0;
-    QString password;
-    QString password_d;
-    QString id_str = 0;
+    QString password, password_d, key, id_str = NULL;
+    int id, row, column = 0;
+    unsigned char* u_key = NULL;
     EncryptDecrypt instance;
     connOpen();
     QSqlQuery* qry = new QSqlQuery(mydb);
@@ -67,18 +66,24 @@ void manager::cellClicked()
     {
         if(ui->tableWidget->item(row,1)->text() == "********")
         {
-            id_str = ui->tableWidget->item(row,3)->text();                               //secilen satirdaki gozukmeyen id getirildi, db'deki ile ayni..
-            id = id_str.split(" ")[0].toInt();
-            qry->prepare("select password from data where id = :id");
+            id_str = ui->tableWidget->item(row,3)->text();                          //secilen satirdaki gozukmeyen id getirildi, db'deki ile ayni..
+            id = id_str.split(" ")[0].toInt();                                      //string to integer conversion..
+            qry->prepare("select * from data where id = :id");
             qry->bindValue(":id", id);
             qry->exec();
             if(qry->next())
             {
-                password   = qry->value(0).toString();
+                password = qry->value(2).toString();                                //get password
+                key = qry->value(4).toString();                                     //get users key
+                key = instance.decrypt_it(key, key.length()/2, instance.getMasterKey());
+                u_key = (unsigned char*)StringToChar(key);
+                password_d = instance.decrypt_it(password, password.length()/2, u_key);
+                ui->tableWidget->item(row,1)->setText(password_d);                  //there is an item in the tablewidget so we can use "item" method
+            }                                                                       //if there would not be an item in the tablewidget we could not use
+            else                                                                    //"setText" method..
+            {
+                QMessageBox::critical(this, tr("error::"), qry->lastError().text());
             }
-            password_d = instance.decrypt_it(password, password.length()/2);
-            //item->setText(password_d);                                        //eger item olması gerekiyorsa kaldır bunu
-            ui->tableWidget->item(row,1)->setText(password_d);                  //bu aslinda bir item, bunu set text yaptigimizda ayari degisiyor mu....
         }
         else
         {
@@ -87,6 +92,7 @@ void manager::cellClicked()
     }
     delete qry;
     delete item;
+    free(u_key);
     connClose();
 }
 
@@ -455,7 +461,8 @@ void manager::on_pushButton_ctrl_clicked()
 
 void manager::on_pushButton_save_clicked()
 {
-    QString username, password,source = "";
+    QString username, password,source, key = "";
+    unsigned char* u_key = NULL;
     passwdsource dialog;                        //passwdsource.cpp'den bir nesne olusturuluyor, oradaki fonk kullaniliyor..
     dialog.setModal(true);                      //yeni ekran aciliyor ve nerde kullanilacagi soruluyor
     connOpen();
@@ -473,15 +480,17 @@ void manager::on_pushButton_save_clicked()
                 return;
             }
 
-
             QSqlQuery qry;                                                                                  //query object, below code is the sql query......send to the database...
             QString crypt_user, crypt_passwd, crypt_source = "";
             EncryptDecrypt instance;
-            crypt_user   = instance.encrypt_it(username);       //username sifrelendi..
-            crypt_passwd = instance.encrypt_it(password);     //password sifrelendi..
-            crypt_source = instance.encrypt_it(source);       //source sifrelendi..
+            key = UserKey;
+            key = instance.decrypt_it(key, key.length()/2, instance.getMasterKey());
+            u_key = (unsigned char*)StringToChar(key);
+            crypt_user   = instance.encrypt_it(username, u_key);     //username sifrelendi..
+            crypt_passwd = instance.encrypt_it(password, u_key);     //password sifrelendi..
+            crypt_source = instance.encrypt_it(source, u_key);       //source sifrelendi..
 
-            qry.prepare("insert into data (username, password, source) values('"+crypt_user+"', '"+crypt_passwd+"', '"+crypt_source+"')");
+            qry.prepare("insert into data (username, password, source, key) values('"+crypt_user+"', '"+crypt_passwd+"', '"+crypt_source+"', '"+UserKey+"')");
 
             if(qry.exec())
             {
@@ -500,13 +509,15 @@ void manager::on_pushButton_save_clicked()
             QMessageBox::information(this, tr("Error"), tr("Please fill in the blanks !"));
         }
     }
+    free(u_key);
 }
 
 
 
 void manager::on_pushButton_ctrl_save_clicked()
 {
-    QString username, password,source = "";
+    QString username, password,source, key = "";
+    unsigned char* u_key = NULL;
     passwdsource dialog;
     dialog.setModal(true);                       //yeni ekran aciliyor ve nerde kullanilacagi soruluyor
     connOpen();
@@ -528,11 +539,14 @@ void manager::on_pushButton_ctrl_save_clicked()
             QSqlQuery qry;                                                                                  //query object, below code is the sql query......send to the database...
             QString crypt_user, crypt_passwd, crypt_source = "";
             EncryptDecrypt instance;
-            crypt_user = instance.encrypt_it(username);       //username sifrelendi..
-            crypt_passwd = instance.encrypt_it(password);     //password sifrelendi..
-            crypt_source = instance.encrypt_it(source);       //source sifrelendi..
+            key = UserKey;
+            key = instance.decrypt_it(key, key.length()/2, instance.getMasterKey());
+            u_key = (unsigned char*)StringToChar(key);
+            crypt_user = instance.encrypt_it(username, u_key);       //username sifrelendi..
+            crypt_passwd = instance.encrypt_it(password, u_key);     //password sifrelendi..
+            crypt_source = instance.encrypt_it(source, u_key);       //source sifrelendi..
 
-            qry.prepare("insert into data (username, password, source) values('"+crypt_user+"', '"+crypt_passwd+"', '"+crypt_source+"')");        //tek tırnak arası çift tırnak, içine iki tane +
+            qry.prepare("insert into data (username, password, source, key) values('"+crypt_user+"', '"+crypt_passwd+"', '"+crypt_source+"', '"+UserKey+"')");        //tek tırnak arası çift tırnak, içine iki tane +
                                                                                                                                                   //icine de atamak istedigimiz degisken..
             if(qry.exec())
             {
@@ -551,16 +565,19 @@ void manager::on_pushButton_ctrl_save_clicked()
             QMessageBox::information(this, tr("Error"), tr("Please fill in the blanks !"));
         }
     }
+    free(u_key);
 }
 
 
 
-void manager::on_pushButton_show_clicked()      //decrypt edip gostermek gerekiyor....
-{                                               //liste verileri tek tek listelenemedi,
-                                                //tüm liste alıp üzerinden gidilip değiştirilecek
-    EncryptDecrypt instance;
-    QString user_e, passwd_e, source_e, id;         //encrypted texts
-    QString user_d, passwd_d, source_d;         //decrypted texts
+void manager::on_pushButton_show_clicked()
+{                                               //decrypt edip gostermek gerekiyor....
+                                                //liste verileri tek tek listelenemedi,
+    EncryptDecrypt instance;                    //tüm liste alıp üzerinden gidilip değiştirilecek
+    QString user_e, passwd_e, source_e;     //encrypted texts
+    QString user_d, source_d;               //decrypted texts
+    QString key, id;
+    unsigned char* u_key = NULL;
     connOpen();
     QSqlQuery* qry = new QSqlQuery(mydb);
 
@@ -572,20 +589,18 @@ void manager::on_pushButton_show_clicked()      //decrypt edip gostermek gerekiy
     qry->prepare("select * from data order by id desc limit 1");
     qry->exec();
     if(qry->next())
-        last_id = qry->value(0).toInt();
-        //eger hic eleman olmadigi halde gosterim yapilmaya calisirsa girmeyecek iceri ve error vermeyecek..
+        last_id = qry->value(0).toInt();                        //last id number in the database
 
     for(int i=1; i<=last_id; i++)                               //burada da, totalde kac row dolu ona bakiyoruz..
     {                                                           //ona gore tabloda bostan satirlar olmuyor
         qry->prepare("select * from data where id = :id");
         qry->bindValue(":id", i);
         qry->exec();
-        if(qry->next())
-        {
+        if(qry->next() && qry->value(4) == UserKey)             //keyler eslesirse row sayisi
+        {                                                       //artiyor ve ona gore olustrlyr
             row_count++;
         }
     }
-
     QStringList labels;
     labels << tr("Username") << tr("Password") << tr("Source");
     ui->tableWidget->setColumnCount(column);
@@ -593,46 +608,39 @@ void manager::on_pushButton_show_clicked()      //decrypt edip gostermek gerekiy
     ui->tableWidget->setHorizontalHeaderLabels(labels);
     ui->tableWidget->QTableView::setColumnHidden(3, true);                              //column id is hide now..
     ui->tableWidget->QTableView::setEditTriggers(QAbstractItemView::NoEditTriggers);    //bu sayede cell'ler disardan editlenemiyor..
-
-    for(int i=1; i<=last_id; i++)
+    if(row_count != 0)
     {
-        QTableWidgetItem* item1 = new QTableWidgetItem();
-        QTableWidgetItem* item2 = new QTableWidgetItem();
-        QTableWidgetItem* item3 = new QTableWidgetItem();
-        QTableWidgetItem* item4 = new QTableWidgetItem();
-
-        qry->prepare("select * from data where id = :id");
-        qry->bindValue(":id", i);
-        qry->exec();
-        if(qry->next())                             //ici dolu id'ler kadar iceri giriyor ve o sayi da tablo olusturuyor..
+        for(int i=1; i<=last_id; i++)
         {
-            user_e   = qry->value(1).toString();
-            passwd_e = qry->value(2).toString();
-            source_e = qry->value(3).toString();
-            id       = qry->value(0).toString();                        //id alındı
-            user_d   = instance.decrypt_it(user_e, user_e.length()/2);
-            passwd_d = instance.decrypt_it(passwd_e, passwd_e.length()/2);
-            source_d = instance.decrypt_it(source_e, source_e.length()/2);
-            item1->setText(user_d);
-            item2->setText("********");     //passwd_d yazarsak eski hali...
-            item3->setText(source_d);
-            item4->setText(id);
-            ui->tableWidget->setItem(row_current,0,item1);
-            ui->tableWidget->setItem(row_current,1,item2);
-            ui->tableWidget->setItem(row_current,2,item3);
-            ui->tableWidget->setItem(row_current,3,item4);
-            row_current++;                                        //artik eleman sayisi kadar tabloya ekleme yapiyor..duzgunce..
-        }
-      else
-        {
-            delete(item1);
-            delete(item2);
-            delete(item3);
-            delete(item4);
+            qry->prepare("select * from data where id = :id");
+            qry->bindValue(":id", i);
+            qry->exec();
+            if(qry->next() && qry->value(4) == UserKey)                             //ici dolu id'ler kadar iceri giriyor ve o sayi da tablo olusturuyor..
+            {
+                user_e   = qry->value(1).toString();
+                passwd_e = qry->value(2).toString();
+                source_e = qry->value(3).toString();
+                id       = qry->value(0).toString();                                //id alındı
+                key      = UserKey;
+                key      = instance.decrypt_it(key, key.length()/2, instance.getMasterKey());
+                u_key    = (unsigned char*)StringToChar(key);
+                user_d   = instance.decrypt_it(user_e, user_e.length()/2, u_key);
+//                passwd_d = instance.decrypt_it(passwd_e, passwd_e.length()/2, u_key);     //password yerine yildiz yazildigi icin, decrypt edilmesine gerek yok..
+                source_d = instance.decrypt_it(source_e, source_e.length()/2, u_key);
+                ui->tableWidget->setItem(row_current,0, new QTableWidgetItem(user_d));
+                ui->tableWidget->setItem(row_current,1, new QTableWidgetItem("********"));
+                ui->tableWidget->setItem(row_current,2, new QTableWidgetItem(source_d));
+                ui->tableWidget->setItem(row_current,3, new QTableWidgetItem(id));
+                row_current++;                                                             //insert element with respect to number of valid records
+            }
         }
     }
-
+//    else
+//    {
+//        QMessageBox::critical(this, tr("Error"), tr("There is no record for this user!"));
+//    }
     {
+        free(u_key);
         connClose();
     }
 }
@@ -641,10 +649,9 @@ void manager::on_pushButton_show_clicked()      //decrypt edip gostermek gerekiy
 
 void manager::on_pushButton_delete_clicked()
 {
-    int sel_row_num = 0;    //selected row number
+    int sel_row_num = 0, id = 0;
     QString id_str;
-    int id;
-
+    bool control = false;
     connOpen();
     QSqlQuery* qry = new QSqlQuery(mydb);
 
@@ -660,6 +667,7 @@ void manager::on_pushButton_delete_clicked()
         if(qry->exec())
         {
             QMessageBox::information(this, tr("Delete"), tr("Deleted!"));
+            control = true;
         }
         else
         {
@@ -672,8 +680,22 @@ void manager::on_pushButton_delete_clicked()
     }
     delete qry;
     connClose();
-    on_pushButton_show_clicked();
+    if(control)
+        on_pushButton_show_clicked();
 }
+
+
+
+void manager::on_pushButton_deleteUser_clicked()
+{
+    this->hide();
+    userdelete dialog;
+    dialog.setModal(true);
+    dialog.exec();
+}
+
+
+
 
 
 
@@ -821,224 +843,3 @@ bool number(QString password)
     return false;
 }
 
-
-
-/*
-//#####################ORJINAL SHOW FONK#################################
-void manager::on_pushButton_show_clicked()          //decrypt edip gostermek gerekiyor....
-{
-    QSqlQueryModel * modal = new QSqlQueryModel();
-    connOpen();
-    QSqlQuery* qry = new QSqlQuery(mydb);
-
-    qry->prepare("select * from data");             //sql sorgusu tum listeyi getiriyor..
-    qry->exec();
-
-    modal->setQuery(*qry);
-
-    ui->tableView->setModel(modal);
-    {
-        delete qry;
-        connClose();
-    }
-}
-*/
-
-
-
-/*
-    //BU YORUMU KALDIR; CALISIYOR BURASI
-    //SHOW FONK'UN BASKA HALİ..
-
-    EncryptDecrypt nesne1;
-    QString decrypted, encrypted;
-    connOpen();
-    QSqlTableModel *modal;
-    modal = new QSqlTableModel(this);           //QSqlTableModel objesi olusturuluyor ve burada kullanilacagi icin, this denildikten sonra diger methodlari gostererek kullaniliyor
-    modal->setTable("data");                    //?!?!?ancak yine de this olayina bak!!!!!!!
-    modal->select();
-    qDebug() << modal->lastError().text();      //error handling..
-    ui->tableView->setModel(modal);             //table showing
-    //sirasiyla asagidaki islemler su isi yapiyor;
-    //tablodan veri aliniyor,
-    //alinan sifreli veri decrypt ediliyor
-    //daha sonra ilgili yere tekrar konuyor
-    //sifreli veri sifresiz bir sekilde
-    //ekranda gozukmus oluyor..
-    for(int i=0; i<modal->rowCount(); i++)      //sutun 1'den baslayacak, id olmasin diye
-    {                                           //iterasyonlar dogru, kontrolu yapildi..
-        for(int j=1; j<modal->columnCount(); j++)
-        {
-            encrypted = modal->data(modal->index(i,j)).toString();
-            decrypted = nesne1.decrypt_it(encrypted, encrypted.length()/2);
-            modal->setData(modal->index(i,j), decrypted);
-            //veriyi aliyor, okuyor, decrypt ediyor ancak degistiremiyor...
-        }
-    }
-*/
-
-
-
-/*
-    dialog.setModal(true);                       //yeni ekran aciliyor ve silinmek istenen id'i soruyor
-    dialog.exec();
-    id = (dialog.getId());
-*/
-
-
-
-/*
-delete from data;
-delete from sqlite_sequence where name = 'data';
-*/
-
-
-
-//Birde uzun username ya da source girilirse de sorun
-//oluyor onunda bir kontrolu yapilirsa sorun kalkiyor..
-
-
-
-/*
-int fonl()      //BU FONKSİYON ÇIKTILAR İÇİN ÖNEMLİ VE KULLANILACAK..
-{
-    QString sifre;
-    QString password = "My Secret Message!";
-    unsigned char* key = (unsigned char*)"0123456789abcdef";
-    unsigned char* text = (unsigned char*)StringToChar(password);
-    int text_len = strlen((const char*)text);
-    unsigned char cipher[64];
-    int cipher_len = encrypt(text, text_len, key, cipher);
-//    for(int i=0; i<cipher_len; i++)
-//    {
-//        qDebug() << cipher[i];
-//        sifre += cipher[i];
-//    }
-    sifre = getStringFromUnsignedChar(cipher);     //asil hex burda..
-    qDebug() << sifre;
-    free(text);     //?!?!?!?
-                                //VERİ SİFRELENİYOR SONRA O HEX HALE GETİRİLİYOR, SONRA TEKRARDAN HEX'TEN DONDURULUP DECRYPT EDİLİYOR
-    QString decrypted_string;
-    unsigned char decrypted[64];
-    unsigned char cipherr[64];
-    qDebug() << "*******";
-    for(int i=0;i<32;++i)
-    {
-         QString hexString = sifre.mid(i*2,2);
-         bool ok = false;
-         cipherr[i] = (unsigned char) hexString.toUShort(&ok,16);
-         //if not ok, handle error
-         qDebug() << cipherr[i];
-    }
-
-    int dec_len = decrypt(cipherr, cipher_len, key, decrypted);
-
-    for(int i=0; i<dec_len; i++)
-    {
-        decrypted_string += decrypted[i];
-    }
-    qDebug() << decrypted_string;
-
-    return 0;
-}
-
-*/
-
-
-
-
-/*
-
-
-void manager::on_pushButton_save_clicked()
-{
-    QString username, password,source;
-    passwdsource dialog;                        //passwdsource.cpp'den bir nesne olusturuluyor, oradaki fonk kullaniliyor..
-    dialog.setModal(true);                      //yeni ekran aciliyor ve nerde kullanilacagi soruluyor
-    dialog.exec();
-    username = dialog.getUsername();            //line_edit'teki veri aliniyor..
-    source = dialog.getSource();
-    password = ui->lineEdit->text();            //password is here now..
-    if(!connOpen())
-    {
-        qDebug() << "Failed to open the database";
-        return;
-    }
-    connOpen();
-    QSqlQuery qry;                                                                                  //query object, below code is the sql query......send to the database...
-    QString crypt_user, crypt_passwd, crypt_source = "";
-    EncryptDecrypt nesne1;
-    crypt_user = nesne1.encrypt_it(username);       //username sifrelendi..
-    crypt_passwd = nesne1.encrypt_it(password);     //password sifrelendi..
-    crypt_source = nesne1.encrypt_it(source);       //source sifrelendi..
-
-    qry.prepare("insert into data (username, password, source) values('"+crypt_user+"', '"+crypt_passwd+"', '"+crypt_source+"')");
-
-    if(qry.exec())
-    {
-        QMessageBox::information(this, tr("Save"), tr("Saved !"));                              //islem basarili bir sekilde gerceklesti ise
-    }
-    else
-    {
-        QMessageBox::information(this, tr("error::"), qry.lastError().text());                  //bir error gerceklesirse, oldugu gibi goster (exception..)
-    }
-    {
-    connClose();
-    }
-}
-
-
-
-*/
-
-
-
-
-//PAROLA GOZUKMUYOR ARTIK ANCAK ITEM YERINE DIREKT TEXT BASIYORUZ, SAGLIKLI MI BIR BAK, AYNI ZAMANDA GEREKİRSE
-//ESKİSİNİ DE SET TEXT YAP...
-
-//KULLANICILAR ICIN AYRI BIR KEY OLUSTURMA VE BUNU AYRI BIR DB'DE KEY ILE TUTUP BU KEY'I ISE UYGULAMADA TUTMALI
-
-
-
-//****************doubleclicked;; OLDUGU GİBİ AL*********************************
-/*
-void manager::cellDoubleClicked()
-{
-    int id = 0;
-    int row = 0;
-    int column = 0;
-    QString password;
-    QString password_d;
-    QString id_str = 0;
-    EncryptDecrypt nesne;
-    connOpen();
-    QSqlQuery* qry = new QSqlQuery(mydb);
-    QTableWidgetItem* item = new QTableWidgetItem();
-
-    QModelIndexList indexes = ui->tableWidget->selectionModel()->selectedIndexes();
-    foreach (QModelIndex index, indexes)
-    {
-        row = index.row();
-        column = index.column();
-    }
-    if(column == 1)
-    {
-        id_str = ui->tableWidget->item(row,3)->text();                               //secilen satirdaki gozukmeyen id getirildi, db'deki ile ayni..
-        id = id_str.split(" ")[0].toInt();
-        qry->prepare("select password from data where id = :id");
-        qry->bindValue(":id", id);
-        qry->exec();
-        if(qry->next())
-        {
-            password   = qry->value(0).toString();
-        }
-        password_d = nesne.decrypt_it(password, password.length()/2);
-        //item->setText(password_d);                                        //eger item olması gerekiyorsa kaldır bunu
-        ui->tableWidget->item(row,1)->setText(password_d);                  //bu aslinda bir item, bunu set text yaptigimizda ayari degisiyor mu....
-    }
-    delete qry;
-    delete item;
-    connClose();
-}
-*/
