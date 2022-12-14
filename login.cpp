@@ -3,71 +3,73 @@
 #include <QTableWidget>
 #include <QTableWidgetItem>
 #include "manager.h"
-
+#include "createuser.h"
 
 login::login(QWidget *parent)
     : QMainWindow(parent)
     , ui(new Ui::login)
 {
     ui->setupUi(this);
+    ui->lineEdit_user->setPlaceholderText("Username");
+    ui->lineEdit_passwd->setPlaceholderText("Password");
 }
+
+QString UserKey = "";
 
 login::~login()
 {
     delete ui;
 }
 
-
 void login::on_pushButton_login_clicked()
 {
-    QString username,password;
+    QString username, password;
+    QString hashUsername, hashPassword;
+
     username = ui->lineEdit_user->text();
     password = ui->lineEdit_passwd->text();
 
-    if((username == "1" && password == "1"))        //admin ve 12345...istegine gore ayarla..
-    {
-        manager secdialog;
-        secdialog.connClose();          //baglanti var ise, veritabaniyla baglanti kapatilip, tekrar aciliyor..
-        this->hide();                   //giris bilgileri dogru ise
-        secdialog.setModal(true);       //asil uygulama ekrani
-        secdialog.exec();               //aciliyor..
-    }
-    else
-    {
-        QMessageBox::critical(this, "Error", "Username or password is not correct !");
-    }
-
-    /*
-    if(!connOpen())
+    connOpen();
+    if(!isconnOpened())
     {
         qDebug() << "Failed to open the database";
         return;
     }
-    connOpen();
-    QSqlQuery qry;                                                          //nesne olusturuldu, database ile o an da
-    qry.prepare("select * from employeeinfo where username='"+username+"' and password='"+password+"'");
-                                                                            //ancak bir tane connection olusturulabiliyor
-    if(qry.exec())
+
+    hashUsername = QString(QCryptographicHash::hash((username.toUtf8()), QCryptographicHash::Md5).toHex());
+    hashPassword = QString(QCryptographicHash::hash((password.toUtf8()), QCryptographicHash::Md5).toHex());
+
+    QSqlQuery* qry = new QSqlQuery(dblogin);
+    qry->prepare("select * from logindata where userlogin='"+hashUsername+"'");
+    qry->exec();
+    if(qry->next())
     {
-        int count = 0;
-        while(qry.next())
+        if(qry->value(2).toString() == hashPassword)
         {
-            count++;
-        }
-        if(count==1)                                                        //parola dogru girildikten sonra, ilk ekran kapanicak
-        {                                                                   //ikinci ekran acilacak..(dialog screen)
-            ui->label_bos->setText("Username and password is correct");     //veriler dogru oldugu
-            connClose();                                                    //icin db ile baglantiyi kapatmak gerek
+            UserKey = qry->value(3).toString();
             this->hide();
-            manager secdialog;
-            secdialog.setModal(true);                                       //bu sekilde manager.ui acilacak
-            secdialog.exec();
+            manager dialog;
+            dialog.setModal(true);
+            dialog.exec();
         }
-        if(count>1)
-            ui->label_bos->setText("Duplicate username and password !");
-        if(count<1)
-            ui->label_bos->setText("Username and password is not correct !");
+        else
+        {
+            QMessageBox::critical(this, "Error", "Username or password is not correct !");
+        }
     }
-    */
+    else
+    {
+        if(qry->lastError().text() == "")
+            QMessageBox::critical(this, tr("Error"), tr("Given username is not valid!"));
+        else
+            QMessageBox::critical(this, tr("error::"), qry->lastError().text());
+    }
+}
+
+void login::on_pushButton_create_clicked()
+{
+    createuser dialog;
+    dialog.setModal(true);
+    dialog.exec();
 }
 
