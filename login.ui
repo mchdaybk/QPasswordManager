@@ -6,8 +6,8 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>472</width>
-    <height>382</height>
+    <width>403</width>
+    <height>229</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -17,10 +17,10 @@
    <widget class="QGroupBox" name="groupBox">
     <property name="geometry">
      <rect>
-      <x>50</x>
-      <y>30</y>
-      <width>361</width>
-      <height>261</height>
+      <x>30</x>
+      <y>20</y>
+      <width>331</width>
+      <height>171</height>
      </rect>
     </property>
     <property name="title">
@@ -29,10 +29,10 @@
     <widget class="QPushButton" name="pushButton_login">
      <property name="geometry">
       <rect>
-       <x>100</x>
-       <y>200</y>
-       <width>151</width>
-       <height>31</height>
+       <x>190</x>
+       <y>130</y>
+       <width>111</width>
+       <height>21</height>
       </rect>
      </property>
      <property name="text">
@@ -52,108 +52,41 @@
       <string/>
      </property>
     </widget>
-    <widget class="QWidget" name="layoutWidget">
+    <widget class="QPushButton" name="pushButton_create">
      <property name="geometry">
       <rect>
-       <x>10</x>
-       <y>60</y>
-       <width>341</width>
-       <height>111</height>
+       <x>30</x>
+       <y>130</y>
+       <width>111</width>
+       <height>21</height>
+      </rect>
+     </property>
+     <property name="text">
+      <string>Create New User</string>
+     </property>
+    </widget>
+    <widget class="QWidget" name="">
+     <property name="geometry">
+      <rect>
+       <x>30</x>
+       <y>40</y>
+       <width>271</width>
+       <height>71</height>
       </rect>
      </property>
      <layout class="QVBoxLayout" name="verticalLayout">
       <item>
-       <layout class="QHBoxLayout" name="horizontalLayout_2">
-        <item>
-         <widget class="QLabel" name="label">
-          <property name="text">
-           <string>Username</string>
-          </property>
-         </widget>
-        </item>
-        <item>
-         <spacer name="horizontalSpacer">
-          <property name="orientation">
-           <enum>Qt::Horizontal</enum>
-          </property>
-          <property name="sizeType">
-           <enum>QSizePolicy::Fixed</enum>
-          </property>
-          <property name="sizeHint" stdset="0">
-           <size>
-            <width>11</width>
-            <height>20</height>
-           </size>
-          </property>
-         </spacer>
-        </item>
-        <item>
-         <widget class="QLineEdit" name="lineEdit_user"/>
-        </item>
-       </layout>
+       <widget class="QLineEdit" name="lineEdit_user"/>
       </item>
       <item>
-       <layout class="QHBoxLayout" name="horizontalLayout">
-        <item>
-         <widget class="QLabel" name="label_2">
-          <property name="text">
-           <string>Password</string>
-          </property>
-         </widget>
-        </item>
-        <item>
-         <spacer name="horizontalSpacer_2">
-          <property name="orientation">
-           <enum>Qt::Horizontal</enum>
-          </property>
-          <property name="sizeType">
-           <enum>QSizePolicy::Fixed</enum>
-          </property>
-          <property name="sizeHint" stdset="0">
-           <size>
-            <width>13</width>
-            <height>20</height>
-           </size>
-          </property>
-         </spacer>
-        </item>
-        <item>
-         <widget class="QLineEdit" name="lineEdit_passwd">
-          <property name="echoMode">
-           <enum>QLineEdit::Password</enum>
-          </property>
-         </widget>
-        </item>
-       </layout>
+       <widget class="QLineEdit" name="lineEdit_passwd">
+        <property name="echoMode">
+         <enum>QLineEdit::Password</enum>
+        </property>
+       </widget>
       </item>
      </layout>
     </widget>
-   </widget>
-   <widget class="QPushButton" name="pushButton_create">
-    <property name="geometry">
-     <rect>
-      <x>50</x>
-      <y>300</y>
-      <width>131</width>
-      <height>24</height>
-     </rect>
-    </property>
-    <property name="text">
-     <string>Create New User</string>
-    </property>
-   </widget>
-   <widget class="QPushButton" name="pushButton_delete">
-    <property name="geometry">
-     <rect>
-      <x>280</x>
-      <y>300</y>
-      <width>131</width>
-      <height>24</height>
-     </rect>
-    </property>
-    <property name="text">
-     <string>Delete Existing User</string>
-    </property>
    </widget>
   </widget>
   <widget class="QMenuBar" name="menubar">
@@ -161,7 +94,7 @@
     <rect>
      <x>0</x>
      <y>0</y>
-     <width>472</width>
+     <width>403</width>
      <height>21</height>
     </rect>
    </property>

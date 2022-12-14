@@ -10,24 +10,26 @@ QT_BEGIN_NAMESPACE
 namespace Ui { class login; }
 QT_END_NAMESPACE
 
+extern QString UserKey;
+
 class login : public QMainWindow
 {
     Q_OBJECT
 
-    /*
+
     public:
-        QSqlDatabase mydb;
+        QSqlDatabase dblogin;
         void connClose()
         {
-            mydb.close();
-            mydb.removeDatabase(QSqlDatabase::defaultConnection);
+            dblogin.close();
+            dblogin.removeDatabase(QSqlDatabase::defaultConnection);
         }
         bool connOpen()
         {
-            mydb=QSqlDatabase::addDatabase("QSQLITE");           //burada QSqlDatabase mydb ile basliyordu
-            mydb.setDatabaseName("C:/Qt/zDB/passwdmanager.db");  //satir, header'a eklendi burdan silindi
+            dblogin=QSqlDatabase::addDatabase("QSQLITE");           //burada QSqlDatabase mydb ile basliyordu
+            dblogin.setDatabaseName("C:/Qt/zDB/login.db");          //satir, header'a eklendi burdan silindi
 
-            if(!mydb.open())
+            if(!dblogin.open())
             {
                 qDebug() << "Failed to open the database";
                 return false;
@@ -38,13 +40,18 @@ class login : public QMainWindow
                 return true;
             }
         }
-    */
+        bool isconnOpened()
+        {
+            return dblogin.isOpen();
+        }
 
-            //eger login bilgilerininde veritabanindan cekilmesi istenirse
-            //buradaki ve login.cpp'deki yildizlari kaldirip, veritabani
-            //konumu ayarlandiktan sonra calistirilmasi yeterli olur..
-            //ancak veritabani baglantisi diger kisim (manager) lazim
-            //oldugu icin, o tarafin header'inda kullaniliyor..
+        /*
+            eger login bilgilerininde veritabanindan cekilmesi istenirse
+            buradaki ve login.cpp'deki yildizlari kaldirip, veritabani
+            konumu ayarlandiktan sonra calistirilmasi yeterli olur..
+            ancak veritabani baglantisi diger kisim (manager) lazim
+            oldugu icin, o tarafin header'inda kullaniliyor..
+        */
 
 public:
     login(QWidget *parent = nullptr);
@@ -52,6 +59,8 @@ public:
 
 private slots:
     void on_pushButton_login_clicked();
+
+    void on_pushButton_create_clicked();
 
 private:
     Ui::login *ui;
