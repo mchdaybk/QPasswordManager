@@ -4,7 +4,6 @@
 #include <QDialog>
 #include <QSqlDatabase>
 #include <QDebug>
-//#include "manager.h"
 
 namespace Ui {
 class createuser;
@@ -17,9 +16,7 @@ class createuser : public QDialog
     QSqlDatabase dblogin;
     void connClose()                                            //veritabani ile baglanti bitirilmek istenirse...
     {
-        {
         dblogin.close();
-        }
         dblogin.removeDatabase(QSqlDatabase::defaultConnection);
     }
     bool connOpen()                                             //veritabani ile baglanti olusturmak istenirse...
@@ -42,8 +39,6 @@ class createuser : public QDialog
     {
         return dblogin.isOpen();
     }
-
-
 
 public:
     explicit createuser(QWidget *parent = nullptr);
