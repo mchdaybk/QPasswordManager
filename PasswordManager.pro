@@ -29,6 +29,11 @@ FORMS += \
     manager.ui \
     passwdsource.ui
 
+TARGET = manager
+TEMPLATE = app
+QT += widgets
+RESOURCES += C:/Users/msaybek/Desktop/repository/QPasswordManager/resources.qrc
+
 ###############  openssl icin eklendi ###############
 
 LIBS += -L../../../../OpenSSL-Win64 -llibcrypto-3-x64

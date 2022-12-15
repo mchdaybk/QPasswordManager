@@ -4,7 +4,6 @@
 #include <QAbstractItemModel>
 #include <QDialog>
 #include "login.h"
-#include "userdelete.h"
 
 
 int deneme();
@@ -37,20 +36,40 @@ manager::manager(QWidget *parent) :
     ui->comboBox->addItem("19", 19);
     ui->comboBox->addItem("20", 20);
 
-//    if(!connOpen())                                                     //database kontrolu saglaniyor..
+//    if(!connOpen())                                                       //controlling database connection
 //        ui->label_db_info->setText("Failed to open the database");
 //    else
 //        ui->label_db_info->setText("Succesfuly connected to database..");
-
+    setWindowIcon(QIcon("C:/Users/msaybek/Desktop/repository/QPasswordManager/key.png"));
+    setWindowTitle("Q Password Manager");
     connect(ui->tableWidget, &QTableWidget::cellClicked, this, &manager::cellClicked);
+    //connect(ui->tableWidget, &QTableWidget::cellClicked, this, &manager::mousePressEvent);
 }
+
+
+//void manager::mousePressEvent(QMouseEvent *e)
+//{
+//    if (e->button() == Qt::RightButton)
+//    {
+//        qDebug() << "hi!";
+//        //QMenu contextMenu;
+//        //contextMenu.addAction("Replace Text", this, [=] {
+//        //    this->grabKeyboard();
+//        //    this->setText("");
+//    }
+//}
+
+
+
+
+
 
 
 void manager::cellClicked()
 {
-    QString password, password_d, key, id_str = NULL;
-    int id, row, column = 0;
-    unsigned char* u_key = NULL;
+    QString password=NULL, password_d=NULL, key=NULL, id_str=NULL;
+    int id=0, row=0, column=0;
+    unsigned char* u_key=NULL;
     EncryptDecrypt instance;
     connOpen();
     QSqlQuery* qry = new QSqlQuery(mydb);
@@ -191,9 +210,9 @@ public:
 
 };
 
-unsigned char* StringToChar(QString string_tobe_char) //QString *str var icinde..,,,,string veriliyor ve fonk'a uygun
-{                                                                                  //olmasi icin char'a donusturuluyor.....
-    QByteArray ba = string_tobe_char.toLocal8Bit();
+unsigned char* StringToChar(QString string_tobe_char)
+{                                                                            //QString *str var icinde..,,,,string veriliyor ve fonk'a uygun
+    QByteArray ba = string_tobe_char.toLocal8Bit();                          //olmasi icin char'a donusturuluyor.....
     unsigned char* converted_char = (unsigned char*)strdup(ba.constData());
     return converted_char;
 }
@@ -311,7 +330,7 @@ void manager::on_pushButton_generate_clicked()
 {
     QString newstring;
     GetRandom instance;                                                            //ikinci deger olarak bir deger atadigimiz icin direkt onu aliyor currentData..
-    int size = ui->comboBox->currentData().toInt();                             //bu da calisiyor..asagidaki de....!!
+    int size = ui->comboBox->currentData().toInt();                                //bu da calisiyor..asagidaki de....!!
     //int size = ui->comboBox->itemData(ui->comboBox->currentIndex()).toInt();  //QVariant
 
     if(ui->checkBox_number->isChecked())                                         //int'e donusturulup, degiskene ataniyor
@@ -688,14 +707,44 @@ void manager::on_pushButton_delete_clicked()
 
 void manager::on_pushButton_deleteUser_clicked()
 {
-    this->hide();
-    userdelete dialog;
-    dialog.setModal(true);
-    dialog.exec();
+    QMessageBox::StandardButton reply;
+    reply = QMessageBox::question(this, "Delete User",
+                                  "Are you sure about delete existing user ?<br><br>"
+                                  "Note that, this will delete all the passwords of this user.",
+                                  QMessageBox::Yes|QMessageBox::No);
+
+    if (reply == QMessageBox::Yes)
+    {
+        qDebug() << "Yes was clicked";
+        connOpen();
+        QSqlQuery* qry = new QSqlQuery(mydb);
+        qry->prepare("delete from data where key = :key");
+        qry->bindValue(":key", UserKey);
+        if(qry->exec())
+        {
+            connClose();
+            connOpen_db();
+            QSqlQuery* qry2 = new QSqlQuery(dblogin);
+            qry2->prepare("delete from logindata where key = :key");
+            qry2->bindValue(":key", UserKey);
+            if(qry2->exec())
+            {
+                QMessageBox::information(this, tr("Delete"), tr("This user was deleted !"));
+                //this->hide();
+                QDialog::close();
+                login *dialog = new login();
+                dialog->show();
+            }
+        }//QApplication::quit();
+    }
+    else
+    {
+        qDebug() << "Yes was *not* clicked";
+    }
 }
 
 
-
+//VERITABANI HALLET
 
 
 

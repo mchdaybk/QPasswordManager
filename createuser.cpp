@@ -9,6 +9,8 @@ createuser::createuser(QWidget *parent) :
     ui->setupUi(this);
     ui->lineEdit_user->setPlaceholderText("Username");
     ui->lineEdit_passwd->setPlaceholderText("Password");
+    setWindowIcon(QIcon("C:/Users/msaybek/Desktop/repository/QPasswordManager/key.png"));
+    setWindowTitle("Create User Account");
 }
 
 createuser::~createuser()
@@ -20,10 +22,9 @@ void createuser::on_pushButton_create_clicked()
 {
     {
         EncryptDecrypt instance;
-        QString username=NULL, password=NULL, key=NULL, user_exist=NULL;
+        QString username=NULL, password=NULL, key=NULL;
         QString hashUsername=NULL, hashPassword=NULL, crypt_key=NULL;
         int last_id=0;
-        bool control=false;
         username = ui->lineEdit_user->text();
         password = ui->lineEdit_passwd->text();
         connOpen();
@@ -45,7 +46,7 @@ void createuser::on_pushButton_create_clicked()
         qry->prepare("select * from logindata order by id desc limit 1");
         qry->exec();
         if(qry->next())
-            last_id = qry->value(0).toInt();                        //last id number in the database
+            last_id = qry->value(0).toInt();
 
         for(int i=1; i<=last_id; i++)
         {
@@ -53,11 +54,9 @@ void createuser::on_pushButton_create_clicked()
             qry->bindValue(":id", i);
             qry->exec();
             qry->next();
-            qDebug() << qry->value(0);
-            if(qry->value(0)==hashUsername)
+            if(qry->value(0)==hashUsername)         //controlling username, if exists throw error
             {
                 QMessageBox::warning(this, tr("Error"), tr("Given username is used !"));
-                control = true;
                 return;
             }
         }
@@ -67,7 +66,7 @@ void createuser::on_pushButton_create_clicked()
         {
             QMessageBox::information(this, tr("Save"), tr("Saved !"));
             QDialog::close();
-        }                                                                                                //veritabani baglantisini kapat..
+        }                                                                                                 //veritabani baglantisini kapat..
         else
         {
             QMessageBox::information(this, tr("error::"), qry->lastError().text());                       //bir error gerceklesirse, oldugu gibi goster (exception..)
