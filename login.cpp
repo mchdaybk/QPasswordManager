@@ -12,6 +12,8 @@ login::login(QWidget *parent)
     ui->setupUi(this);
     ui->lineEdit_user->setPlaceholderText("Username");
     ui->lineEdit_passwd->setPlaceholderText("Password");
+    setWindowIcon(QIcon("C:/Users/msaybek/Desktop/repository/QPasswordManager/key.png"));
+    setWindowTitle("Q Password Manager");
 }
 
 QString UserKey = "";
@@ -23,47 +25,50 @@ login::~login()
 
 void login::on_pushButton_login_clicked()
 {
-    QString username, password;
-    QString hashUsername, hashPassword;
-
-    username = ui->lineEdit_user->text();
-    password = ui->lineEdit_passwd->text();
-
-    connOpen();
-    if(!isconnOpened())
     {
-        qDebug() << "Failed to open the database";
-        return;
-    }
+        QString username, password;
+        QString hashUsername, hashPassword;
 
-    hashUsername = QString(QCryptographicHash::hash((username.toUtf8()), QCryptographicHash::Md5).toHex());
-    hashPassword = QString(QCryptographicHash::hash((password.toUtf8()), QCryptographicHash::Md5).toHex());
+        username = ui->lineEdit_user->text();
+        password = ui->lineEdit_passwd->text();
 
-    QSqlQuery* qry = new QSqlQuery(dblogin);
-    qry->prepare("select * from logindata where userlogin='"+hashUsername+"'");
-    qry->exec();
-    if(qry->next())
-    {
-        if(qry->value(2).toString() == hashPassword)
+        connOpen();
+        if(!isconnOpened())
         {
-            UserKey = qry->value(3).toString();
-            this->hide();
-            manager dialog;
-            dialog.setModal(true);
-            dialog.exec();
+            qDebug() << "Failed to open the database";
+            return;
+        }
+
+        hashUsername = QString(QCryptographicHash::hash((username.toUtf8()), QCryptographicHash::Md5).toHex());
+        hashPassword = QString(QCryptographicHash::hash((password.toUtf8()), QCryptographicHash::Md5).toHex());
+
+        QSqlQuery* qry = new QSqlQuery(dblogin);
+        qry->prepare("select * from logindata where userlogin='"+hashUsername+"'");
+        qry->exec();
+        if(qry->next())
+        {
+            if(qry->value(2).toString() == hashPassword)
+            {
+                UserKey = qry->value(3).toString();                             //getting users key to use it in app and show only users values..
+                this->hide();
+                manager dialog;
+                dialog.setModal(true);
+                dialog.exec();
+            }
+            else
+            {
+                QMessageBox::critical(this, "Error", "Username or password is not correct !");
+            }
         }
         else
         {
-            QMessageBox::critical(this, "Error", "Username or password is not correct !");
+            if(qry->lastError().text() == "")
+                QMessageBox::critical(this, tr("Error"), tr("Given username is not valid!"));
+            else
+                QMessageBox::critical(this, tr("error::"), qry->lastError().text());
         }
     }
-    else
-    {
-        if(qry->lastError().text() == "")
-            QMessageBox::critical(this, tr("Error"), tr("Given username is not valid!"));
-        else
-            QMessageBox::critical(this, tr("error::"), qry->lastError().text());
-    }
+    connClose();
 }
 
 void login::on_pushButton_create_clicked()

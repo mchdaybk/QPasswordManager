@@ -4,7 +4,6 @@
 #include "openssl/evp.h"
 #include "openssl/conf.h"
 #include "passwdsource.h"
-#include "userdelete.h"
 #include <QDialog>
 #include <QString>
 #include <QCheckBox>
@@ -15,6 +14,7 @@
 #include <QFileInfo>
 #include <QTableWidget>
 #include <QTableWidgetItem>
+#include <QMouseEvent>
 
 int encrypt(unsigned char*, int, unsigned char*, unsigned char*);
 int decrypt(unsigned char*, int, unsigned char*, unsigned char*);
@@ -54,6 +54,34 @@ public:
             return true;
         }
     }
+
+public:
+    QSqlDatabase dblogin;
+    void connClose_db()
+    {
+        dblogin.close();
+        dblogin.removeDatabase(QSqlDatabase::defaultConnection);
+    }
+    bool connOpen_db()
+    {
+        dblogin=QSqlDatabase::addDatabase("QSQLITE");           //burada QSqlDatabase mydb ile basliyordu
+        dblogin.setDatabaseName("C:/Qt/zDB/login.db");          //satir, header'a eklendi burdan silindi
+
+        if(!dblogin.open())
+        {
+            qDebug() << "Failed to open the database";
+            return false;
+        }
+        else
+        {
+            qDebug() << "Connected...";
+            return true;
+        }
+    }
+    bool isconnOpened_db()
+    {
+        return dblogin.isOpen();
+    }
     bool isconnOpened()
     {
         return mydb.isOpen();
@@ -76,12 +104,15 @@ private slots:
 
     void on_pushButton_delete_clicked();
 
+    void on_pushButton_deleteUser_clicked();
+
     void cellClicked();
 
-    void on_pushButton_deleteUser_clicked();
+   // void mousePressEvent(QMouseEvent*);
 
 private:
     Ui::manager *ui;
+
 };
 
 
@@ -156,5 +187,8 @@ private:
     unsigned char* masterKey = (unsigned char*)"abcdef0123456789";
     const QString Characters = "a0bc1de2fg3hi4jk5lm6no7pr8st9vyqzw";
 };
+
+
+
 
 #endif // MANAGER_H
