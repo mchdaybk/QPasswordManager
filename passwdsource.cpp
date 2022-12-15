@@ -1,5 +1,6 @@
 #include "passwdsource.h"
 #include "ui_passwdsource.h"
+#include <QTextLayout>
 
 passwdsource::passwdsource(QWidget *parent) :
     QDialog(parent),
@@ -7,6 +8,10 @@ passwdsource::passwdsource(QWidget *parent) :
 {
     ui->setupUi(this);
     connect(ui->pushButton, SIGNAL(clicked()), this, SLOT(accept()));
+    ui->lineEdit_username->setPlaceholderText("What is the username for this password?");
+    ui->lineEdit->setPlaceholderText("Where do you want to use this password? (twitter, facebook etc.)");
+    setWindowIcon(QIcon("C:/Users/msaybek/Desktop/repository/QPasswordManager/key.png"));
+    setWindowTitle("Username and Source");
 }
 
 passwdsource::~passwdsource()
@@ -28,7 +33,8 @@ QString passwdsource::getUsername()
 
 void passwdsource::on_pushButton_clicked()
 {
-    hide();
+    QDialog::close();                                               //hide yerine dialog kapatıldı!!!!!!!!!SON DEGISIKLIKLERDEN
+    //hide();
     //buraya bir bool return vs konularak, kayit iptal edilmesi
     //durumunda yazilanlari kaydetmeme durumu dusunulebilir.
     //suan parola kaydet denildikten sonra herhangi bir metin girilmese de kaydediyor.
