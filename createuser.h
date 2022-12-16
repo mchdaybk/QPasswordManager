@@ -16,14 +16,17 @@ class createuser : public QDialog
     QSqlDatabase dblogin;
     void connClose()                                            //veritabani ile baglanti bitirilmek istenirse...
     {
-        dblogin.close();
-        dblogin.removeDatabase(QSqlDatabase::defaultConnection);
+        QString connection;
+        connection = dblogin.connectionName();
+        dblogin = QSqlDatabase();
+        QSqlDatabase::removeDatabase(connection);
+        qDebug() << "Disconnected...createuser";
+        return;
     }
     bool connOpen()                                             //veritabani ile baglanti olusturmak istenirse...
     {
         dblogin=QSqlDatabase::addDatabase("QSQLITE");
-        dblogin.setDatabaseName("C:/Qt/zDB/login.db");           //veritabani konumu
-
+        dblogin.setDatabaseName("C:/Qt/zDB/manager.db");           //veritabani konumu
         if(!dblogin.open())
         {
             qDebug() << "Failed to open the database";
@@ -31,7 +34,7 @@ class createuser : public QDialog
         }
         else
         {
-            qDebug() << "Connected...";
+            qDebug() << "Connected...createuser";
             return true;
         }
     }
