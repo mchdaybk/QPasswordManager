@@ -27,51 +27,57 @@ void createuser::on_pushButton_create_clicked()
         int last_id=0;
         username = ui->lineEdit_user->text();
         password = ui->lineEdit_passwd->text();
-        connOpen();
-        if(!isconnOpened())
+        if(!(username=="" || password==""))
         {
-            qDebug() << "Failed to open the database";
-            return;
-        }
-        do
-        {
-            key       = instance.getRandomKey();
-            crypt_key = instance.encrypt_it(key, instance.getMasterKey());
-        }while(crypt_key.contains("00"));                                                   //because if crypted_key has 00 in it, problem occurs when decrypting that key.
-
-        hashUsername = QString(QCryptographicHash::hash((username.toUtf8()), QCryptographicHash::Md5).toHex());
-        hashPassword = QString(QCryptographicHash::hash((password.toUtf8()), QCryptographicHash::Md5).toHex());
-
-        QSqlQuery* qry = new QSqlQuery(dblogin);
-        qry->prepare("select * from logindata order by id desc limit 1");
-        qry->exec();
-        if(qry->next())
-            last_id = qry->value(0).toInt();
-
-        for(int i=1; i<=last_id; i++)
-        {
-            qry->prepare("select userlogin from logindata where id = :id");
-            qry->bindValue(":id", i);
-            qry->exec();
-            qry->next();
-            if(qry->value(0)==hashUsername)         //controlling username, if exists throw error
+            do
             {
-                QMessageBox::warning(this, tr("Error"), tr("Given username is used !"));
+                key       = instance.getRandomKey();
+                crypt_key = instance.encrypt_it(key, instance.getMasterKey());
+            }while(crypt_key.contains("00"));                                                   //because if crypted_key has 00 in it, problem occurs when decrypting that key.
+
+            hashUsername = QString(QCryptographicHash::hash((username.toUtf8()), QCryptographicHash::Md5).toHex());
+            hashPassword = QString(QCryptographicHash::hash((password.toUtf8()), QCryptographicHash::Md5).toHex());
+            connOpen();
+            if(!isconnOpened())
+            {
+                qDebug() << "Failed to open the database";
                 return;
             }
-        }
+            QSqlQuery* qry = new QSqlQuery(dblogin);
+            qry->prepare("select * from logindata order by id desc limit 1");                   //if there is no record in the db, program do not enter inside this if..
+            qry->exec();
+            if(qry->next())
+                last_id = qry->value(0).toInt();
 
-        qry->prepare("insert into logindata (userlogin, passwdlogin, key) values('"+hashUsername+"', '"+hashPassword+"', '"+crypt_key+"')");
-        if(qry->exec())
-        {
-            QMessageBox::information(this, tr("Save"), tr("Saved !"));
-            QDialog::close();
-        }                                                                                                 //veritabani baglantisini kapat..
+            for(int i=1; i<=last_id; i++)
+            {
+                qry->prepare("select userlogin from logindata where id = :id");
+                qry->bindValue(":id", i);
+                qry->exec();
+                qry->next();
+                if(qry->value(0)==hashUsername)         //controlling username, if exists throw error
+                {
+                    QMessageBox::warning(this, tr("Error"), tr("Given username is used !"));
+                    connClose();
+                    return;
+                }
+            }
+
+            qry->prepare("insert into logindata (userlogin, passwdlogin, key) values('"+hashUsername+"', '"+hashPassword+"', '"+crypt_key+"')");
+            if(qry->exec())
+            {
+                QMessageBox::information(this, tr("Save"), tr("Saved !"));
+                QDialog::close();
+            }                                                                                                 //veritabani baglantisini kapat..
+            else
+            {
+                QMessageBox::information(this, tr("error::"), qry->lastError().text());                       //bir error gerceklesirse, oldugu gibi goster (exception..)
+            }
+        }
         else
         {
-            QMessageBox::information(this, tr("error::"), qry->lastError().text());                       //bir error gerceklesirse, oldugu gibi goster (exception..)
+            QMessageBox::information(this, tr("Error"), tr("Please enter valid username and password !"));
         }
     }
     connClose();
-    //delete qry;
 }

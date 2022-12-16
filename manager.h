@@ -33,10 +33,12 @@ public:
     QSqlDatabase mydb;
     void connClose()                                            //veritabani ile baglanti bitirilmek istenirse...
     {
-        {
-        mydb.close();
-        }
-        mydb.removeDatabase(QSqlDatabase::defaultConnection);
+        QString connection;
+        connection = mydb.connectionName();
+        mydb = QSqlDatabase();
+        QSqlDatabase::removeDatabase(connection);
+        qDebug() << "Disconnected...manager";
+        return;
     }
     bool connOpen()                                             //veritabani ile baglanti olusturmak istenirse...
     {
@@ -50,22 +52,27 @@ public:
         }
         else
         {
-            qDebug() << "Connected...";
+            qDebug() << "Connected...manager";
             return true;
         }
     }
-
+    bool isconnOpened()
+    {
+        return mydb.isOpen();
+    }
+/*
 public:
     QSqlDatabase dblogin;
     void connClose_db()
     {
         dblogin.close();
-        dblogin.removeDatabase(QSqlDatabase::defaultConnection);
+        qDebug() << "Disconnected...db";
+//        dblogin.removeDatabase(QSqlDatabase::defaultConnection);
     }
     bool connOpen_db()
     {
         dblogin=QSqlDatabase::addDatabase("QSQLITE");           //burada QSqlDatabase mydb ile basliyordu
-        dblogin.setDatabaseName("C:/Qt/zDB/login.db");          //satir, header'a eklendi burdan silindi
+        dblogin.setDatabaseName("C:/Qt/zDB/manager.db");          //satir, header'a eklendi burdan silindi
 
         if(!dblogin.open())
         {
@@ -74,7 +81,7 @@ public:
         }
         else
         {
-            qDebug() << "Connected...";
+            qDebug() << "Connected...db";
             return true;
         }
     }
@@ -82,10 +89,7 @@ public:
     {
         return dblogin.isOpen();
     }
-    bool isconnOpened()
-    {
-        return mydb.isOpen();
-    }
+*/
 
 public:
     explicit manager(QWidget *parent = nullptr);
