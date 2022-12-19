@@ -14,7 +14,7 @@ class createuser : public QDialog
     Q_OBJECT
 
     QSqlDatabase dblogin;
-    void connClose()                                            //veritabani ile baglanti bitirilmek istenirse...
+    void connClose()
     {
         QString connection;
         connection = dblogin.connectionName();
@@ -23,10 +23,10 @@ class createuser : public QDialog
         qDebug() << "Disconnected...createuser";
         return;
     }
-    bool connOpen()                                             //veritabani ile baglanti olusturmak istenirse...
+    bool connOpen()
     {
         dblogin=QSqlDatabase::addDatabase("QSQLITE");
-        dblogin.setDatabaseName("C:/Qt/zDB/manager.db");           //veritabani konumu
+        dblogin.setDatabaseName("C:/Qt/zDB/manager.db");
         if(!dblogin.open())
         {
             qDebug() << "Failed to open the database";

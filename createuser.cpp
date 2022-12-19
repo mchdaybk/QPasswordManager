@@ -27,7 +27,7 @@ void createuser::on_pushButton_create_clicked()
         int last_id=0;
         username = ui->lineEdit_user->text();
         password = ui->lineEdit_passwd->text();
-        if(!(username=="" || password==""))
+        if(username!="" || password!="")
         {
             do
             {
