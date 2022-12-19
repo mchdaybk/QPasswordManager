@@ -33,12 +33,10 @@ QString passwdsource::getUsername()
 
 void passwdsource::on_pushButton_clicked()
 {
-    QDialog::close();                                               //hide yerine dialog kapatıldı!!!!!!!!!SON DEGISIKLIKLERDEN
+    QDialog::close();
     //hide();
-    //buraya bir bool return vs konularak, kayit iptal edilmesi
-    //durumunda yazilanlari kaydetmeme durumu dusunulebilir.
-    //suan parola kaydet denildikten sonra herhangi bir metin girilmese de kaydediyor.
 
-    //ui->setupUi ALTINA YAZILAN SAYESİNDE BU BAHSEDİLEN İŞLEM TAMAMLANDI..
+    //according to the codes in ui->setupUi (constructor), if the user closes dialog
+    //save process halt.
 }
 

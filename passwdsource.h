@@ -17,7 +17,6 @@ public:
     ~passwdsource();
     QString getSource();
     QString getUsername();
-    //class instance getVariables();  //bunu yapinca ancak ui'lere erisim oluyor..
 
 private slots:
     void on_pushButton_clicked();
