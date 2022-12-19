@@ -68,10 +68,10 @@ void createuser::on_pushButton_create_clicked()
             {
                 QMessageBox::information(this, tr("Save"), tr("Saved !"));
                 QDialog::close();
-            }                                                                                                 //veritabani baglantisini kapat..
+            }
             else
             {
-                QMessageBox::information(this, tr("error::"), qry->lastError().text());                       //bir error gerceklesirse, oldugu gibi goster (exception..)
+                QMessageBox::information(this, tr("error::"), qry->lastError().text());        //if an error occures, throw this error (exception..)
             }
         }
         else

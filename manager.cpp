@@ -3,6 +3,7 @@
 #include <QItemSelectionModel>
 #include <QAbstractItemModel>
 #include <QDialog>
+#include <QClipboard>
 #include "login.h"
 
 
@@ -22,10 +23,10 @@ manager::manager(QWidget *parent) :
     ui(new Ui::manager)
 {
     ui->setupUi(this);
-    ui->comboBox->addItem("8", 8);      //burada, kullanıcıya 8 gosterirken (ilk kisim),
-    ui->comboBox->addItem("9", 9);      //8'i sectiginde hangi degere esit olmasini
-    ui->comboBox->addItem("10", 10);    //istiyorsak, ona gore bir deger yaziyoruz
-    ui->comboBox->addItem("11", 11);    //ikinci kisma..
+    ui->comboBox->addItem("8", 8);      //the numbers inside the quotations marks are
+    ui->comboBox->addItem("9", 9);      //the numbers we want to show and the numbers
+    ui->comboBox->addItem("10", 10);    //located right, the value of choice.
+    ui->comboBox->addItem("11", 11);
     ui->comboBox->addItem("12", 12);
     ui->comboBox->addItem("13", 13);
     ui->comboBox->addItem("14", 14);
@@ -38,28 +39,26 @@ manager::manager(QWidget *parent) :
 
     setWindowIcon(QIcon("C:/Users/msaybek/Desktop/repository/QPasswordManager/key.png"));
     setWindowTitle("Q Password Manager");
+    ui->lineEdit->setPlaceholderText("Generate password with above choices");
+    ui->lineEdit_ctrl->setPlaceholderText("Enter the password you want to control");
     connect(ui->tableWidget, &QTableWidget::cellClicked, this, &manager::cellClicked);
     connOpen();
-    //connect(ui->tableWidget, &QTableWidget::cellClicked, this, &manager::mousePressEvent);
+
+    ui->tableWidget->setContextMenuPolicy(Qt::CustomContextMenu);
+    //below signal is for copy the password when right click on it
+    connect(ui->tableWidget, &QWidget::customContextMenuRequested,this,[this]()
+    {
+        QList<QTableWidgetItem *> items=ui->tableWidget->selectedItems();
+        if(items.count()>0)
+            qDebug()<<items[0]->text();
+        QString copypasswd = items[0]->text();
+        qApp->clipboard()->setText(copypasswd);
+    });
 }
 
 
-//void manager::mousePressEvent(QMouseEvent *e)
-//{
-//    if (e->button() == Qt::RightButton)
-//    {
-//        qDebug() << "hi!";
-//        //QMenu contextMenu;
-//        //contextMenu.addAction("Replace Text", this, [=] {
-//        //    this->grabKeyboard();
-//        //    this->setText("");
-//    }
-//}
 
-
-
-
-
+//passwords decrypted in below function..
 
 void manager::cellClicked()
 {
@@ -82,7 +81,7 @@ void manager::cellClicked()
         {
 //            connOpen();
             QSqlQuery* qry = new QSqlQuery(mydb);
-            id_str = ui->tableWidget->item(row,3)->text();                          //secilen satirdaki gozukmeyen id getirildi, db'deki ile ayni..
+            id_str = ui->tableWidget->item(row,3)->text();                          //get id number of selected cell which was same with the id number in database
             id = id_str.split(" ")[0].toInt();                                      //string to integer conversion..
             qry->prepare("select * from data where id = :id");
             qry->bindValue(":id", id);
@@ -94,8 +93,8 @@ void manager::cellClicked()
                 key = instance.decrypt_it(key, key.length()/2, instance.getMasterKey());
                 u_key = (unsigned char*)StringToChar(key);
                 password_d = instance.decrypt_it(password, password.length()/2, u_key);
-                ui->tableWidget->item(row,1)->setText(password_d);                  //there is an item in the tablewidget so we can use "item" method
-                delete qry;                                                         //if there would not be an item in the tablewidget we could not use
+                ui->tableWidget->item(row,1)->setText(password_d);                    //there is an item in the tablewidget so we can use "item" method..
+                delete qry;                                                           //if there would not be an item in the tablewidget we could not use
 //                connClose();                                                        //"setText" method..
             }
             else
@@ -121,8 +120,8 @@ public:
 
     QString GetRandomStr(int size)
     {
-        const int randomStringLength = size; // minimum 8 olarak belirleniyor..
-        QString randomString;           //this->size olunca, private'daki size'i aliyor..
+        const int randomStringLength = size;
+        QString randomString;
         for(int i=0; i<randomStringLength; ++i)
         {
             //int index = qrand() % possibleCharacters.length();
@@ -209,8 +208,8 @@ public:
 };
 
 unsigned char* StringToChar(QString string_tobe_char)
-{                                                                            //QString *str var icinde..,,,,string veriliyor ve fonk'a uygun
-    QByteArray ba = string_tobe_char.toLocal8Bit();                          //olmasi icin char'a donusturuluyor.....
+{
+    QByteArray ba = string_tobe_char.toLocal8Bit();
     unsigned char* converted_char = (unsigned char*)strdup(ba.constData());
     return converted_char;
 }
@@ -239,7 +238,7 @@ QString getStringFromUnsignedChar(unsigned char str[64], int cipher_len){
 
     return result;
 }
-
+//below functions are openssl's aes128 functions for encryption and decryption
 int encrypt(unsigned char* text, int text_len, unsigned char* key, unsigned char* cipher){
     int cipher_len = 0;
     int len = 0;
@@ -328,11 +327,11 @@ manager::~manager()
 void manager::on_pushButton_generate_clicked()
 {
     QString newstring;
-    GetRandom instance;                                                            //ikinci deger olarak bir deger atadigimiz icin direkt onu aliyor currentData..
-    int size = ui->comboBox->currentData().toInt();                                //bu da calisiyor..asagidaki de....!!
-    //int size = ui->comboBox->itemData(ui->comboBox->currentIndex()).toInt();  //QVariant
+    GetRandom instance;
+    int size = ui->comboBox->currentData().toInt();                                //both are work..this line and below line..
+    //int size = ui->comboBox->itemData(ui->comboBox->currentIndex()).toInt();
 
-    if(ui->checkBox_number->isChecked())                                         //int'e donusturulup, degiskene ataniyor
+    if(ui->checkBox_number->isChecked())                                           //converting int and assign a variable
     {
         if(ui->checkBox_letter->isChecked())
         {
@@ -341,7 +340,7 @@ void manager::on_pushButton_generate_clicked()
                 instance.setCharacter_Number_Big_Special();
                 do
                 {
-                    newstring = instance.GetRandomStr(size); //+rakam, buyukharf, ozel karakter durumu
+                    newstring = instance.GetRandomStr(size);    //number, bigletter, special character case
                 }while(!letter_special_number(newstring));
                 ui->lineEdit->setText(newstring);
             }
@@ -352,7 +351,7 @@ void manager::on_pushButton_generate_clicked()
                 {
                 newstring = instance.GetRandomStr(size);
                 }while(!letter_number(newstring));
-                ui->lineEdit->setText(newstring);     //+rakam ve buyukharf durumu
+                ui->lineEdit->setText(newstring);               //number and big letter case
             }
         }
         else
@@ -362,7 +361,7 @@ void manager::on_pushButton_generate_clicked()
             {
             newstring = instance.GetRandomStr(size);
             }while(!number(newstring));
-            ui->lineEdit->setText(newstring);         //+rakam durumu
+            ui->lineEdit->setText(newstring);                   //number case
         }
     }
     else if(ui->checkBox_letter->isChecked())
@@ -374,7 +373,7 @@ void manager::on_pushButton_generate_clicked()
             {
             newstring = instance.GetRandomStr(size);
             }while(!letter_special(newstring));
-            ui->lineEdit->setText(newstring);     //+buyukharf ve ozel durumu
+            ui->lineEdit->setText(newstring);                   //big letter and special character case
         }
         else
         {
@@ -382,7 +381,7 @@ void manager::on_pushButton_generate_clicked()
             do{
             newstring = instance.GetRandomStr(size);
             }while(!letter(newstring));
-            ui->lineEdit->setText(newstring);         //+buyukharf durumu
+            ui->lineEdit->setText(newstring);                   //big letter case
         }
     }
     else if(ui->checkBox_special->isChecked())
@@ -394,7 +393,7 @@ void manager::on_pushButton_generate_clicked()
             {
             newstring = instance.GetRandomStr(size);
             }while(!special_number(newstring));
-            ui->lineEdit->setText(newstring);     //+ozel ve rakam durumu
+            ui->lineEdit->setText(newstring);                   //special character and number case
         }
         else
         {
@@ -402,13 +401,13 @@ void manager::on_pushButton_generate_clicked()
             do{
             newstring = instance.GetRandomStr(size);
             }while(!special(newstring));
-            ui->lineEdit->setText(newstring);         //+ozel durumu
+            ui->lineEdit->setText(newstring);                   //special character case
         }
     }
     else
     {
         newstring = instance.GetRandomStr(size);
-        ui->lineEdit->setText(newstring);             //sadece kucuk harf durumu
+        ui->lineEdit->setText(newstring);                       //only small letter case
     }
 }
 
@@ -417,16 +416,16 @@ void manager::on_pushButton_generate_clicked()
 void manager::on_pushButton_ctrl_clicked()
 {
     ControlPasswd nesne;
-    QString password_ctrl = ui->lineEdit_ctrl->text(); //get text from line edit
-    if(password_ctrl.length() >= 8 && password_ctrl.length() <= 20)  //karakter sınırı
+    QString password_ctrl = ui->lineEdit_ctrl->text();               //get text from line edit
+    if(password_ctrl.length() >= 8 && password_ctrl.length() <= 20)  //character boundary
     {
         if(!ui->checkBox_number_ctrl->isChecked() && !ui->checkBox_letter_ctrl->isChecked() && !ui->checkBox_special_ctrl->isChecked())
         {
             QMessageBox::information(this, "Message", "Please give at least one property from the boxes !");
         }
-        else if(ui->checkBox_number_ctrl->isChecked() && nesne.Control_Number(password_ctrl)) //control special characters
+        else if(ui->checkBox_number_ctrl->isChecked() && nesne.Control_Number(password_ctrl))      //control special characters
         {
-            if(ui->checkBox_letter_ctrl->isChecked() && nesne.Control_Letter(password_ctrl)) //control numbers
+            if(ui->checkBox_letter_ctrl->isChecked() && nesne.Control_Letter(password_ctrl))       //control numbers
             {
                 if(ui->checkBox_special_ctrl->isChecked() && nesne.Control_Special(password_ctrl)) //control big letters
                 {
@@ -470,7 +469,7 @@ void manager::on_pushButton_ctrl_clicked()
         }
     }
     else
-    {           //else onemli, else olmayinca her turlu uyari veriyor..
+    {           //if "else" does not exists, program will give error for all the case's
         QMessageBox::warning(this, "Character bound", "The password must be in the range of 8-20 characters !");
     }
 }
@@ -483,39 +482,39 @@ void manager::on_pushButton_save_clicked()
         QString username, password,source, key = "";
         unsigned char* u_key = NULL;
 //        connOpen();
-        passwdsource dialog;                        //passwdsource.cpp'den bir nesne olusturuluyor, oradaki fonk kullaniliyor..
-        dialog.setModal(true);                      //yeni ekran aciliyor ve nerde kullanilacagi soruluyor
-        if(dialog.exec() == QDialog::Accepted)      //OK tusu basilmissa geliyor
+        passwdsource dialog;                        //create instance from passwdsource for use to passwdsource's function
+        dialog.setModal(true);                      //new dialog opens and getting source and username for given password..
+        if(dialog.exec() == QDialog::Accepted)      //proceed when press OK
         {
             username = dialog.getUsername();
             source = dialog.getSource();
             password = ui->lineEdit->text();
 
-            if(username != "" && source != "" && password != "")        //bosluklar doldurulmamissa girmiyor..
+            if(username != "" && source != "" && password != "")        //if given lines are not empty
             {
                 if(!isconnOpened())
                 {
                     qDebug() << "Failed to open the database";
                     return;
                 }
-                QSqlQuery qry;                                                                                  //query object, below code is the sql query......send to the database...
+                QSqlQuery qry;                                          //query object....below code is the sql query......to sending database...
                 QString crypt_user, crypt_passwd, crypt_source = "";
                 EncryptDecrypt instance;
                 key = UserKey;
                 key = instance.decrypt_it(key, key.length()/2, instance.getMasterKey());
                 u_key = (unsigned char*)StringToChar(key);
-                crypt_user   = instance.encrypt_it(username, u_key);     //username sifrelendi..
-                crypt_passwd = instance.encrypt_it(password, u_key);     //password sifrelendi..
-                crypt_source = instance.encrypt_it(source, u_key);       //source sifrelendi..
+                crypt_user   = instance.encrypt_it(username, u_key);     //username crypted
+                crypt_passwd = instance.encrypt_it(password, u_key);     //password crypted
+                crypt_source = instance.encrypt_it(source, u_key);       //source crypted
 
                 qry.prepare("insert into data (username, password, source, key) values('"+crypt_user+"', '"+crypt_passwd+"', '"+crypt_source+"', '"+UserKey+"')");
                 if(qry.exec())
                 {
-                    QMessageBox::information(this, tr("Save"), tr("Saved !"));                              //islem basarili bir sekilde gerceklesti ise
+                    QMessageBox::information(this, tr("Save"), tr("Saved !"));                    //if process executed successfully
                 }
                 else
                 {
-                    QMessageBox::information(this, tr("error::"), qry.lastError().text());                  //bir error gerceklesirse, oldugu gibi goster (exception..)
+                    QMessageBox::information(this, tr("error::"), qry.lastError().text());        //if an error occures, throw this error (exception..)
                 }
             }
             else
@@ -536,40 +535,40 @@ void manager::on_pushButton_ctrl_save_clicked()
         QString username, password,source, key = "";
         unsigned char* u_key = NULL;
 //        connOpen();
-        passwdsource dialog;
-        dialog.setModal(true);                       //yeni ekran aciliyor ve nerde kullanilacagi soruluyor
-        if(dialog.exec() == QDialog::Accepted)
+        passwdsource dialog;                        //create instance from passwdsource for use to passwdsource's function
+        dialog.setModal(true);                      //new dialog opens and getting source and username for given password..
+        if(dialog.exec() == QDialog::Accepted)      //proceed when press OK
         {
             username = dialog.getUsername();
-            source = dialog.getSource();                 //line_edit'teki veri aliniyor..
-            password = ui->lineEdit_ctrl->text();        //password is here now..
+            source = dialog.getSource();
+            password = ui->lineEdit_ctrl->text();
 
-            if(username != "" && source != "" && password != "")
+            if(username != "" && source != "" && password != "")        //if given lines are not empty
             {
                 if(!isconnOpened())
                 {
                     qDebug() << "Failed to open the database";
                     return;
                 }
-                QSqlQuery qry;                                                                                  //query object, below code is the sql query......send to the database...
+                QSqlQuery qry;                                          //query object....below code is the sql query......to sending database...
                 QString crypt_user, crypt_passwd, crypt_source = "";
                 EncryptDecrypt instance;
                 key = UserKey;
                 key = instance.decrypt_it(key, key.length()/2, instance.getMasterKey());
                 u_key = (unsigned char*)StringToChar(key);
-                crypt_user = instance.encrypt_it(username, u_key);       //username sifrelendi..
-                crypt_passwd = instance.encrypt_it(password, u_key);     //password sifrelendi..
-                crypt_source = instance.encrypt_it(source, u_key);       //source sifrelendi..
+                crypt_user   = instance.encrypt_it(username, u_key);      //username crypted
+                crypt_passwd = instance.encrypt_it(password, u_key);      //password crypted
+                crypt_source = instance.encrypt_it(source, u_key);        //source crypted
 
-                qry.prepare("insert into data (username, password, source, key) values('"+crypt_user+"', '"+crypt_passwd+"', '"+crypt_source+"', '"+UserKey+"')");        //tek tırnak arası çift tırnak, içine iki tane +
-                //icine de atamak istedigimiz degisken..
+                qry.prepare("insert into data (username, password, source, key) values('"+crypt_user+"', '"+crypt_passwd+"', '"+crypt_source+"', '"+UserKey+"')");
+
                 if(qry.exec())
                 {
-                    QMessageBox::information(this, tr("Save"), tr("Saved !"));                                   //islem basarili bir sekilde gerceklesti ise
-                }                                                                                                //veritabani baglantisini kapat..
+                    QMessageBox::information(this, tr("Save"), tr("Saved !"));                    //if process executed successfully
+                }
                 else
                 {
-                    QMessageBox::information(this, tr("error::"), qry.lastError().text());                       //bir error gerceklesirse, oldugu gibi goster (exception..)
+                    QMessageBox::information(this, tr("error::"), qry.lastError().text());        //if an error occures, throw this error (exception..)
                 }
             }
             else
@@ -585,9 +584,12 @@ void manager::on_pushButton_ctrl_save_clicked()
 
 
 void manager::on_pushButton_show_clicked()
-{                                               //decrypt edip gostermek gerekiyor....
-    {                                           //liste verileri tek tek listelenemedi,
-        EncryptDecrypt instance;                //tüm liste alıp üzerinden gidilip değiştirilecek
+{                                               //password should be showed as plain text..
+    {                                           //taking all the list from db then showing
+        EncryptDecrypt instance;                //records by their id's one by one, the
+                                                //list is not directly retrieved from the
+                                                //db and displayed. there is decryption process
+
         QString user_e, passwd_e, source_e;     //encrypted texts
         QString user_d, source_d;               //decrypted texts
         QString key, id;
@@ -596,22 +598,22 @@ void manager::on_pushButton_show_clicked()
         QSqlQuery* qry = new QSqlQuery(mydb);
 
         int column = 4;
-        int last_id = 0;                            //son elemanın id numarası
-        int row_count = 0;                          //totalde kac row dolu? ona gore row sayisi verilecek ve loop'a girecek
-        int row_current = 0;                        //duzgun atama yapilabilmesi icin mevcuttaki row index'i
+        int last_id = 0;                            //id number of the last record in the database
+        int row_count = 0;                          //total filled row number in the db..According to it, the number of rows will be given and it will enter the loop.
+        int row_current = 0;                        //to assign process clean, current row index is
 
         qry->prepare("select * from data order by id desc limit 1");
         qry->exec();
         if(qry->next())
             last_id = qry->value(0).toInt();                        //last id number in the database
 
-        for(int i=1; i<=last_id; i++)                               //burada da, totalde kac row dolu ona bakiyoruz..
-        {                                                           //ona gore tabloda bostan satirlar olmuyor
+        for(int i=1; i<=last_id; i++)                               //here, controlling filled rows
+        {                                                           //to clean table view (5 filled rows, 5 rows should be in table)
             qry->prepare("select * from data where id = :id");
             qry->bindValue(":id", i);
             qry->exec();
-            if(qry->next() && qry->value(4) == UserKey)             //keyler eslesirse row sayisi
-            {                                                       //artiyor ve ona gore olustrlyr
+            if(qry->next() && qry->value(4) == UserKey)             //if keys are matched
+            {                                                       //increase row number to show
                 row_count++;
             }
         }
@@ -621,7 +623,7 @@ void manager::on_pushButton_show_clicked()
         ui->tableWidget->setRowCount(row_count);
         ui->tableWidget->setHorizontalHeaderLabels(labels);
         ui->tableWidget->QTableView::setColumnHidden(3, true);                              //column id is hide now..
-        ui->tableWidget->QTableView::setEditTriggers(QAbstractItemView::NoEditTriggers);    //bu sayede cell'ler disardan editlenemiyor..
+        ui->tableWidget->QTableView::setEditTriggers(QAbstractItemView::NoEditTriggers);    //cells can not be editable by this line.
         if(row_count != 0)
         {
             for(int i=1; i<=last_id; i++)
@@ -629,23 +631,23 @@ void manager::on_pushButton_show_clicked()
                 qry->prepare("select * from data where id = :id");
                 qry->bindValue(":id", i);
                 qry->exec();
-                if(qry->next() && qry->value(4) == UserKey)                             //ici dolu id'ler kadar iceri giriyor ve o sayi da tablo olusturuyor..
+                if(qry->next() && qry->value(4) == UserKey)                             //enter inside this if, by the matched keys and also filled rows
                 {
                     user_e   = qry->value(1).toString();
                     passwd_e = qry->value(2).toString();
                     source_e = qry->value(3).toString();
-                    id       = qry->value(0).toString();                                //id alındı
+                    id       = qry->value(0).toString();                                //get id from database
                     key      = UserKey;
                     key      = instance.decrypt_it(key, key.length()/2, instance.getMasterKey());
                     u_key    = (unsigned char*)StringToChar(key);
                     user_d   = instance.decrypt_it(user_e, user_e.length()/2, u_key);
-//                  passwd_d = instance.decrypt_it(passwd_e, passwd_e.length()/2, u_key);     //password yerine yildiz yazildigi icin, decrypt edilmesine gerek yok..
+//                  passwd_d = instance.decrypt_it(passwd_e, passwd_e.length()/2, u_key);     //there is no needed decryption because passwords are showed as **** for the first time,,passwords decrypted in cellClicked() function
                     source_d = instance.decrypt_it(source_e, source_e.length()/2, u_key);
                     ui->tableWidget->setItem(row_current,0, new QTableWidgetItem(user_d));
                     ui->tableWidget->setItem(row_current,1, new QTableWidgetItem("********"));
                     ui->tableWidget->setItem(row_current,2, new QTableWidgetItem(source_d));
-                    ui->tableWidget->setItem(row_current,3, new QTableWidgetItem(id));
-                    row_current++;                                                             //insert element with respect to number of valid records
+                    ui->tableWidget->setItem(row_current,3, new QTableWidgetItem(id));          //insert id number exactly the same as db and store in hided column
+                    row_current++;                                                              //insert element with respect to number of valid records
                 }
             }
         }
@@ -666,12 +668,12 @@ void manager::on_pushButton_delete_clicked()
         QSqlQuery* qry = new QSqlQuery(mydb);
 
         QModelIndexList indexes = ui->tableWidget->selectionModel()->selectedRows();
-        if( indexes.count() > 0 )                                             // eger secim yapilmamissa girmeyecek..
+        if( indexes.count() > 0 )                                             //if there is no selected row, function pass this
         {
             sel_row_num = indexes[0].row();                                   // will return the row-index of the first selected row
 
-            id_str = ui->tableWidget->item(sel_row_num,3)->text();            // secilen row'un id'sini alip, direkt db'e atip siliyoruz, hide column sayesinde..
-            id = id_str.split(" ")[0].toInt();
+            id_str = ui->tableWidget->item(sel_row_num,3)->text();            // get the id of selected row, then delete in the database
+            id = id_str.split(" ")[0].toInt();                                // get id which is exactly the same as db, through to hided row (stores id number same as in the database)
             qry->prepare("delete from data where id = :id");
             qry->bindValue(":id", id);
             if(qry->exec())
@@ -698,7 +700,7 @@ void manager::on_pushButton_delete_clicked()
 
 
 void manager::on_pushButton_deleteUser_clicked()
-{
+{                                                                                               //delete all user records
     QMessageBox::StandardButton reply;
     reply = QMessageBox::question(this, "Delete User",
                                   "Are you sure about delete existing user ?<br><br>"
@@ -734,9 +736,20 @@ void manager::on_pushButton_deleteUser_clicked()
 }
 
 
-//VERITABANI HALLET
+
+void manager::on_pushButton_deleteUser_2_clicked()
+{
+    on_pushButton_deleteUser_clicked();
+}
 
 
+
+//The following functions check if the options
+//in the selected check boxes are actually included
+//in the password. Since the password is generated
+//with the character set given to it, these characters
+//sometimes may not be in the generated password, so
+//these passwords should be checked.
 
 bool letter_special_number(QString password)
 {
@@ -881,4 +894,7 @@ bool number(QString password)
     }
     return false;
 }
+
+
+
 

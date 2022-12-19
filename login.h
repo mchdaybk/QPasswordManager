@@ -30,8 +30,8 @@ public:
     }
     bool connOpen()
     {
-        dblogin=QSqlDatabase::addDatabase("QSQLITE");           //burada QSqlDatabase mydb ile basliyordu
-        dblogin.setDatabaseName("C:/Qt/zDB/manager.db");          //satir, header'a eklendi burdan silindi
+        dblogin=QSqlDatabase::addDatabase("QSQLITE");
+        dblogin.setDatabaseName("C:/Qt/zDB/manager.db");
 
         if(!dblogin.open())
         {
@@ -48,14 +48,6 @@ public:
     {
         return dblogin.isOpen();
     }
-
-    /*
-            eger login bilgilerininde veritabanindan cekilmesi istenirse
-            buradaki ve login.cpp'deki yildizlari kaldirip, veritabani
-            konumu ayarlandiktan sonra calistirilmasi yeterli olur..
-            ancak veritabani baglantisi diger kisim (manager) lazim
-            oldugu icin, o tarafin header'inda kullaniliyor..
-        */
 
 public:
     login(QWidget *parent = nullptr);

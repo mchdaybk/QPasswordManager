@@ -31,7 +31,7 @@ class manager : public QDialog
 
 public:
     QSqlDatabase mydb;
-    void connClose()                                            //veritabani ile baglanti bitirilmek istenirse...
+    void connClose()                                            //close connection to the database
     {
         QString connection;
         connection = mydb.connectionName();
@@ -40,10 +40,10 @@ public:
         qDebug() << "Disconnected...manager";
         return;
     }
-    bool connOpen()                                             //veritabani ile baglanti olusturmak istenirse...
+    bool connOpen()                                             //open connection to the database
     {
         mydb=QSqlDatabase::addDatabase("QSQLITE");
-        mydb.setDatabaseName("C:/Qt/zDB/manager.db");           //veritabani konumu
+        mydb.setDatabaseName("C:/Qt/zDB/manager.db");           //db location
 
         if(!mydb.open())
         {
@@ -60,36 +60,6 @@ public:
     {
         return mydb.isOpen();
     }
-/*
-public:
-    QSqlDatabase dblogin;
-    void connClose_db()
-    {
-        dblogin.close();
-        qDebug() << "Disconnected...db";
-//        dblogin.removeDatabase(QSqlDatabase::defaultConnection);
-    }
-    bool connOpen_db()
-    {
-        dblogin=QSqlDatabase::addDatabase("QSQLITE");           //burada QSqlDatabase mydb ile basliyordu
-        dblogin.setDatabaseName("C:/Qt/zDB/manager.db");          //satir, header'a eklendi burdan silindi
-
-        if(!dblogin.open())
-        {
-            qDebug() << "Failed to open the database";
-            return false;
-        }
-        else
-        {
-            qDebug() << "Connected...db";
-            return true;
-        }
-    }
-    bool isconnOpened_db()
-    {
-        return dblogin.isOpen();
-    }
-*/
 
 public:
     explicit manager(QWidget *parent = nullptr);
@@ -110,9 +80,9 @@ private slots:
 
     void on_pushButton_deleteUser_clicked();
 
-    void cellClicked();
+    void on_pushButton_deleteUser_2_clicked();
 
-   // void mousePressEvent(QMouseEvent*);
+    void cellClicked();
 
 private:
     Ui::manager *ui;
@@ -123,7 +93,7 @@ private:
 class EncryptDecrypt
 {
 public:
-    //unsigned char* key = (unsigned char*)"0123456789abcdef";      //disaridan olusturup veriyoruz..sifreleme icin anahtar
+    //unsigned char* key = (unsigned char*)"0123456789abcdef";
     int cipher_len = 0;
     unsigned char cipher[64];
 
@@ -132,11 +102,11 @@ public:
         QString encrypted_text;
         unsigned char* text = (unsigned char*)StringToChar(password);
         int text_len = strlen((const char*)text);
-        memset(&cipher[0], 0, sizeof(cipher));  //cipher sıfırlanıyor ki, temiz bir sekilde sifreleyelim..
-        cipher_len = encrypt(text, text_len, key, cipher);  //CİPHER 64'LUK BİR CHAR ARRAY
+        memset(&cipher[0], 0, sizeof(cipher));              //to clean encryption process, cipher array cleaned
+        cipher_len = encrypt(text, text_len, key, cipher);  //cipher is the 64 element char array and it should be according to the openssl's aes128 function
         free(text);
         encrypted_text = getStringFromUnsignedChar(cipher, cipher_len);
-        return encrypted_text;  //SIFRENIN HEX'LI HALI
+        return encrypted_text;                              //password in hex
     }
 
     /*
@@ -152,21 +122,21 @@ SON DURUMDA BU CLASS FONK'LARI DUZGUN CALISMAKTADIR..
     QString decrypt_it(QString crypt_password, int cipher_len, unsigned char* key)
     {
         QString decrypted_string;
-        unsigned char decrypted[64];    //yeni 64'luk char array, duz parola..
+        unsigned char decrypted[64];    //new password actually, 64 element char array
         unsigned char cipher[64];
-        for(int i=0;i<cipher_len;++i)   //normalde 32
+        for(int i=0;i<cipher_len;++i)   //its 32 in initial state(openssl)
         {
              QString hexString = crypt_password.mid(i*2,2);
              bool ok = false;
              cipher[i] = (unsigned char)hexString.toUShort(&ok,16);  //if not ok, handle error
         }
-        //cipher 64'luk bir char array, password'un donusturulmus hali..
+        //cipher is 64 element char array, it stores converted password
         int dec_len = decrypt(cipher, cipher_len, key, decrypted);
         for(int i=0; i<dec_len; i++)
         {
-            decrypted_string += decrypted[i];       //EKK
+            decrypted_string += decrypted[i];
         }
-        return decrypted_string;    //cozulmus string bunun icinde...
+        return decrypted_string;
     }
 
     QString getRandomKey()
@@ -188,8 +158,8 @@ SON DURUMDA BU CLASS FONK'LARI DUZGUN CALISMAKTADIR..
     }
 
 private:
-    unsigned char* masterKey = (unsigned char*)"abcdef0123456789";
-    const QString Characters = "a0bc1de2fg3hi4jk5lm6no7pr8st9vyqzw";
+    unsigned char* masterKey = (unsigned char*)"abcdef0123456789";          //master key of the program...this key encrypt to generated keys
+    const QString Characters = "a0bc1de2fg3hi4jk5lm6no7pr8st9vyqzw";        //character set to the generate keys
 };
 
 
