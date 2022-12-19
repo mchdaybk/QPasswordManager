@@ -110,14 +110,13 @@ public:
     }
 
     /*
-encrypt_it ile birlikte girilen parola 64'luk bir char array oluyor kutuphane ile,
-biz ise onu hex'e donusturup db'e aktariyoruz..db'de o sekilde bekliyor..sonra ise
-db'den hex'li hali aliniyor 64'luk char array haline tekrar getiriliyor cunku
-kutuphane fonk'u ancak bu sekilde duzgun calisabiliyor, daha sonra bu 64'luk char
-array ilgili fonk'a gonderilip asil girilen parola qstring ile tekrar normal hale
-getirilip ilgili yerde ekrana bastiriliyor..
-SON DURUMDA BU CLASS FONK'LARI DUZGUN CALISMAKTADIR..
-    */
+     * due to the "encrypt_it" function, the password converting to the unsigned
+     * char array[64] by the library itself. In this program, this array converting
+     * to the hex value then store in the database. Through this process, given
+     * password encrypted. For decryption, stored hex value fetching from database
+     * then converting to the QString type then converting char array then decrypting
+     * process then the password obtained as plain text (no encrypted value) in QString.
+     */
 
     QString decrypt_it(QString crypt_password, int cipher_len, unsigned char* key)
     {
