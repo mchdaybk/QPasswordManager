@@ -214,11 +214,13 @@ unsigned char* StringToChar(QString string_tobe_char)
     return converted_char;
 }
 
-//unsigned char pointer --unsigned char* str-- verildiginde array
-//icerisinde -null- elemani varsa, elemani gorene kadar array'i
-//aliyor ancak -null- dan sonraki uyeler kayboluyor cunku
-//array'i bitmis kabul ediyor bu da verinin yanlis saklanmasina
-//sebep oluyor o da crash yapiyor..
+//When unsigned char pointer passed into the func., the
+//program stop reading array pointer when array
+//has an '/0' in it. So, unsigned char array used in this
+//case instead of char array pointer. The problem solved.
+//This issue was happening when array pointer passed to the
+//"StringToChar" function.
+
 
 QString getStringFromUnsignedChar(unsigned char str[64], int cipher_len){
     QString result = "";
