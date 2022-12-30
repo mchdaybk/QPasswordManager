@@ -36,8 +36,10 @@ RESOURCES += C:/Users/msaybek/Desktop/repository/QPasswordManager/resources.qrc
 
 ###############  openssl icin eklendi ###############
 
-LIBS += -L../../../../OpenSSL-Win64 -llibcrypto-3-x64
-LIBS += -L../../../../OpenSSL-Win64 -llibssl-3-x64
+#LIBS += -L../../../../OpenSSL-Win64 -llibcrypto-3-x64
+#LIBS += -L../../../../OpenSSL-Win64 -llibssl-3-x64
+LIBS += -LC:/OpenSSL-Win64 -llibcrypto-3-x64
+LIBS += -LC:/OpenSSL-Win64 -llibssl-3-x64
 
 INCLUDEPATH += C:/OpenSSL-Win64/include
 

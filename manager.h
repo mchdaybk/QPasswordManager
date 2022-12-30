@@ -133,7 +133,7 @@ public:
         int dec_len = decrypt(cipher, cipher_len, key, decrypted);
         for(int i=0; i<dec_len; i++)
         {
-            decrypted_string += decrypted[i];
+            decrypted_string += QChar(decrypted[i]);
         }
         return decrypted_string;
     }

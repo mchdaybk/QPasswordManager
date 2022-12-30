@@ -2,6 +2,8 @@
 #include "ui_login.h"
 #include <QTableWidget>
 #include <QTableWidgetItem>
+#include <QFile>
+#include <QCoreApplication>
 #include "manager.h"
 #include "createuser.h"
 
@@ -14,6 +16,29 @@ login::login(QWidget *parent)
     ui->lineEdit_passwd->setPlaceholderText("Password");
     setWindowIcon(QIcon("C:/Users/msaybek/Desktop/repository/QPasswordManager/key.png"));
     setWindowTitle("Q Password Manager");
+
+    /*
+    if(!QFileInfo::exists("C:/Users/msaybek/Desktop/ZZZZ/database.db"))
+    {
+        QFile file("C:/Users/msaybek/Desktop/ZZZZ/database.db");
+        file.open(QIODevice::ReadWrite);
+        QSqlDatabase dbcreate = QSqlDatabase::addDatabase("QSQLITE");
+        dbcreate.setDatabaseName("C:/Users/msaybek/Desktop/ZZZZ/database.db");
+        if(dbcreate.open())
+        {
+            QSqlQuery qry;
+            qry.prepare("CREATE TABLE IF NOT EXISTS data (id INTEGER PRIMARY KEY AUTOINCREMENT, username varchar(64), password varchar(64), source varchar(64), key varchar(64)");
+            if(!qry.exec())
+            {
+                QMessageBox::warning(this, tr("error::"), qry.lastError().text());
+            }
+        }
+    }
+    else
+    {
+        qDebug() << "hi";
+    }
+    */
 }
 
 QString UserKey = "";

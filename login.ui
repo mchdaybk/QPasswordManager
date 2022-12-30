@@ -7,7 +7,7 @@
     <x>0</x>
     <y>0</y>
     <width>403</width>
-    <height>229</height>
+    <height>232</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -20,7 +20,7 @@
       <x>30</x>
       <y>20</y>
       <width>331</width>
-      <height>171</height>
+      <height>181</height>
      </rect>
     </property>
     <property name="title">
@@ -32,7 +32,7 @@
        <x>190</x>
        <y>130</y>
        <width>111</width>
-       <height>21</height>
+       <height>31</height>
       </rect>
      </property>
      <property name="text">
@@ -58,14 +58,14 @@
        <x>30</x>
        <y>130</y>
        <width>111</width>
-       <height>21</height>
+       <height>31</height>
       </rect>
      </property>
      <property name="text">
       <string>Create New User</string>
      </property>
     </widget>
-    <widget class="QWidget" name="">
+    <widget class="QWidget" name="layoutWidget">
      <property name="geometry">
       <rect>
        <x>30</x>

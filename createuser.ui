@@ -19,14 +19,14 @@
      <x>100</x>
      <y>140</y>
      <width>161</width>
-     <height>24</height>
+     <height>31</height>
     </rect>
    </property>
    <property name="text">
     <string>Create</string>
    </property>
   </widget>
-  <widget class="QWidget" name="">
+  <widget class="QWidget" name="layoutWidget">
    <property name="geometry">
     <rect>
      <x>50</x>

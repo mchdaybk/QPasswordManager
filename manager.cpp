@@ -1,10 +1,11 @@
 #include "manager.h"
 #include "ui_manager.h"
+#include "login.h"
+#include "openssl/evp.h"
 #include <QItemSelectionModel>
 #include <QAbstractItemModel>
 #include <QDialog>
 #include <QClipboard>
-#include "login.h"
 
 
 int deneme();
@@ -15,7 +16,6 @@ bool special_number(QString);
 bool letter(QString);
 bool special(QString);
 bool number(QString);
-
 
 
 manager::manager(QWidget *parent) :
@@ -171,7 +171,7 @@ public:
     bool Control_Letter(QString control)
     {
         QString letters = "ABCDEFGHIJKLMNOPQRSTUVWXYZ";
-        for(int i=0; i<=letters.length(); i++)
+        for(int i=0; i<letters.length(); i++)
         {
             if(control.contains(letters[i]))
             {
@@ -183,7 +183,7 @@ public:
     bool Control_Special(QString control)
     {
         QString special = ".,!'#+%-_";
-        for(int i=0; i<=special.length(); i++)
+        for(int i=0; i<special.length(); i++)
         {
             if(control.contains(special[i]))
             {
@@ -195,7 +195,7 @@ public:
     bool Control_Number(QString control)
     {
         QString numbers = "0123456789";
-        for(int i=0; i<=numbers.length(); i++)
+        for(int i=0; i<numbers.length(); i++)
         {
             if(control.contains(numbers[i]))
             {
@@ -417,7 +417,7 @@ void manager::on_pushButton_generate_clicked()
 
 void manager::on_pushButton_ctrl_clicked()
 {
-    ControlPasswd nesne;
+    ControlPasswd instance;
     QString password_ctrl = ui->lineEdit_ctrl->text();               //get text from line edit
     if(password_ctrl.length() >= 8 && password_ctrl.length() <= 20)  //character boundary
     {
@@ -425,11 +425,11 @@ void manager::on_pushButton_ctrl_clicked()
         {
             QMessageBox::information(this, "Message", "Please give at least one property from the boxes !");
         }
-        else if(ui->checkBox_number_ctrl->isChecked() && nesne.Control_Number(password_ctrl))      //control special characters
+        else if(ui->checkBox_number_ctrl->isChecked() && instance.Control_Number(password_ctrl))      //control special characters
         {
-            if(ui->checkBox_letter_ctrl->isChecked() && nesne.Control_Letter(password_ctrl))       //control numbers
+            if(ui->checkBox_letter_ctrl->isChecked() && instance.Control_Letter(password_ctrl))       //control numbers
             {
-                if(ui->checkBox_special_ctrl->isChecked() && nesne.Control_Special(password_ctrl)) //control big letters
+                if(ui->checkBox_special_ctrl->isChecked() && instance.Control_Special(password_ctrl)) //control big letters
                 {
                     QMessageBox::information(this, "Message", "OK! The password has special characters and numbers and big letters !");
                 }
@@ -443,9 +443,9 @@ void manager::on_pushButton_ctrl_clicked()
                 QMessageBox::information(this, "Message", "OK! The password has only numbers !");
             }
         }
-        else if(ui->checkBox_letter_ctrl->isChecked() && nesne.Control_Letter(password_ctrl))
+        else if(ui->checkBox_letter_ctrl->isChecked() && instance.Control_Letter(password_ctrl))
         {
-            if(ui->checkBox_special_ctrl->isChecked() && nesne.Control_Special(password_ctrl))
+            if(ui->checkBox_special_ctrl->isChecked() && instance.Control_Special(password_ctrl))
             {
                 QMessageBox::information(this, "Message", "OK! The password has both big letters and special characters !");
             }
@@ -454,9 +454,9 @@ void manager::on_pushButton_ctrl_clicked()
                 QMessageBox::information(this, "Message", "OK! The password has only big letters !");
             }
         }
-        else if(ui->checkBox_special_ctrl->isChecked() && nesne.Control_Special(password_ctrl))
+        else if(ui->checkBox_special_ctrl->isChecked() && instance.Control_Special(password_ctrl))
         {
-            if(ui->checkBox_number_ctrl->isChecked() && nesne.Control_Number(password_ctrl))
+            if(ui->checkBox_number_ctrl->isChecked() && instance.Control_Number(password_ctrl))
             {
                 QMessageBox::information(this, "Message", "OK! The password has numbers and special characters !");
             }
@@ -759,15 +759,15 @@ bool letter_special_number(QString password)
     QString str_special = ".,!'#+%-_";
     QString str_number = "0123456789";
 
-    for(int i=0; i<=str_letter.length(); i++)
+    for(int i=0; i<str_letter.length(); i++)
     {
         if(password.contains(str_letter[i]))
         {
-            for(int j=0; j<=str_special.length(); j++)
+            for(int j=0; j<str_special.length(); j++)
             {
                 if(password.contains(str_special[j]))
                 {
-                    for(int k=0; k<=str_number; k++)
+                    for(int k=0; k<str_number.length(); k++)            //EKK
                     {
                         if(password.contains(str_number[k]))
                         {
@@ -789,11 +789,11 @@ bool letter_special(QString password)
     QString str_letter = "ABCDEFGHIJKLMNOPQRSTUVWXYZ";
     QString str_special = ".,!'#+%-_";
 
-    for(int i=0; i<=str_letter.length(); i++)
+    for(int i=0; i<str_letter.length(); i++)
     {
         if(password.contains(str_letter[i]))
         {
-            for(int j=0; j<=str_special.length(); j++)
+            for(int j=0; j<str_special.length(); j++)                   //EKK
             {
                 if(password.contains(str_special[j]))
                 {
@@ -812,11 +812,11 @@ bool letter_number(QString password)
     QString str_letter = "ABCDEFGHIJKLMNOPQRSTUVWXYZ";
     QString str_number = "0123456789";
 
-    for(int i=0; i<=str_letter.length(); i++)
+    for(int i=0; i<str_letter.length(); i++)
     {
         if(password.contains(str_letter[i]))
         {
-            for(int j=0; j<=str_number.length(); j++)
+            for(int j=0; j<str_number.length(); j++)            //EKYAPILDI
             {
                 if(password.contains(str_number[j]))
                 {
@@ -835,11 +835,11 @@ bool special_number(QString password)
     QString str_special = ".,!'#+%-_";
     QString str_number = "0123456789";
 
-    for(int i=0; i<=str_special.length(); i++)
+    for(int i=0; i<str_special.length(); i++)
     {
         if(password.contains(str_special[i]))
         {
-            for(int j=0; j<=str_number.length(); j++)
+            for(int j=0; j<str_number.length(); j++)            //EKKK
             {
                 if(password.contains(str_number[j]))
                 {
@@ -857,7 +857,7 @@ bool letter(QString password)
 {
     QString str_letter = "ABCDEFGHIJKLMNOPQRSTUVWXYZ";
 
-    for(int i=0; i<=str_letter.length(); i++)
+    for(int i=0; i<str_letter.length(); i++)
     {
         if(password.contains(str_letter[i]))
         {
@@ -872,7 +872,7 @@ bool special(QString password)
 {
     QString str_special = ".,!'#+%-_";
 
-    for(int i=0; i<=str_special.length(); i++)
+    for(int i=0; i<str_special.length(); i++)
     {
         if(password.contains(str_special[i]))
         {
@@ -887,7 +887,7 @@ bool number(QString password)
 {
     QString str_number = "0123456789";
 
-    for(int i=0; i<=str_number.length(); i++)
+    for(int i=0; i<str_number.length(); i++)
     {
         if(password.contains(str_number[i]))
         {
