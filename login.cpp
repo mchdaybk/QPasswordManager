@@ -88,6 +88,7 @@ void login::on_pushButton_login_clicked()
         else
         {
             QMessageBox::critical(this, "Error", "Username or password is not correct !");
+            connClose();
         }
     }
     else
@@ -96,6 +97,7 @@ void login::on_pushButton_login_clicked()
             QMessageBox::critical(this, tr("Error"), tr("Given username is not valid!"));
         else
             QMessageBox::critical(this, tr("error::"), qry->lastError().text());
+        connClose();
     }
 }
 

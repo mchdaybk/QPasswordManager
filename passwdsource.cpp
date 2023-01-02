@@ -1,6 +1,7 @@
 #include "passwdsource.h"
 #include "ui_passwdsource.h"
 #include <QTextLayout>
+#include <QCoreApplication>
 
 passwdsource::passwdsource(QWidget *parent) :
     QDialog(parent),
