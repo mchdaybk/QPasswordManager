@@ -9,7 +9,7 @@ createuser::createuser(QWidget *parent) :
     ui->setupUi(this);
     ui->lineEdit_user->setPlaceholderText("Username");
     ui->lineEdit_passwd->setPlaceholderText("Password");
-    setWindowIcon(QIcon("C:/Users/msaybek/Desktop/repository/QPasswordManager/key.png"));
+    setWindowIcon(QIcon(img_location));
     setWindowTitle("Create User Account");
 }
 

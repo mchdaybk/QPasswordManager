@@ -9,6 +9,7 @@ class passwdsource;
 }
 
 extern QString db_location;
+extern QString img_location;
 
 class passwdsource : public QDialog
 {

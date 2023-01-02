@@ -14,7 +14,7 @@ login::login(QWidget *parent)
     ui->setupUi(this);
     ui->lineEdit_user->setPlaceholderText("Username");
     ui->lineEdit_passwd->setPlaceholderText("Password");
-    setWindowIcon(QIcon("C:/Users/msaybek/Desktop/repository/QPasswordManager/key.png"));
+    setWindowIcon(QIcon(img_location));
     setWindowTitle("Q Password Manager");
 
     //Creating database..for the first run

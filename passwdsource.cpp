@@ -10,7 +10,7 @@ passwdsource::passwdsource(QWidget *parent) :
     connect(ui->pushButton, SIGNAL(clicked()), this, SLOT(accept()));
     ui->lineEdit_username->setPlaceholderText("What is the username for this password?");
     ui->lineEdit->setPlaceholderText("Where do you want to use this password? (twitter, facebook etc.)");
-    setWindowIcon(QIcon("C:/Users/msaybek/Desktop/repository/QPasswordManager/key.png"));
+    setWindowIcon(QIcon(img_location));
     setWindowTitle("Username and Source");
 }
 
@@ -41,3 +41,4 @@ void passwdsource::on_pushButton_clicked()
 }
 
 QString db_location = "C:/Users/msaybek/Desktop/ZZZZ/database.db";
+QString img_location = "C:/Users/msaybek/Desktop/repository/QPasswordManager/key.png";

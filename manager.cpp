@@ -37,7 +37,7 @@ manager::manager(QWidget *parent) :
     ui->comboBox->addItem("19", 19);
     ui->comboBox->addItem("20", 20);
 
-    setWindowIcon(QIcon("C:/Users/msaybek/Desktop/repository/QPasswordManager/key.png"));
+    setWindowIcon(QIcon(img_location));
     setWindowTitle("Q Password Manager");
     ui->lineEdit->setPlaceholderText("Generate password with above choices");
     ui->lineEdit_ctrl->setPlaceholderText("Enter the password you want to control");
