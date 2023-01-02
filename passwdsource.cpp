@@ -41,4 +41,4 @@ void passwdsource::on_pushButton_clicked()
 }
 
 QString db_location = "C:/Users/msaybek/Desktop/ZZZZ/database.db";
-QString img_location = "C:/Users/msaybek/Desktop/repository/QPasswordManager/key.png";
+QString img_location = "C:/Users/msaybek/Desktop/ZZZZ/QPasswordManager/key.png";
