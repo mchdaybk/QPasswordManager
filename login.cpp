@@ -17,28 +17,29 @@ login::login(QWidget *parent)
     setWindowIcon(QIcon("C:/Users/msaybek/Desktop/repository/QPasswordManager/key.png"));
     setWindowTitle("Q Password Manager");
 
-    /*
+
     if(!QFileInfo::exists("C:/Users/msaybek/Desktop/ZZZZ/database.db"))
     {
-        QFile file("C:/Users/msaybek/Desktop/ZZZZ/database.db");
-        file.open(QIODevice::ReadWrite);
         QSqlDatabase dbcreate = QSqlDatabase::addDatabase("QSQLITE");
         dbcreate.setDatabaseName("C:/Users/msaybek/Desktop/ZZZZ/database.db");
         if(dbcreate.open())
         {
             QSqlQuery qry;
-            qry.prepare("CREATE TABLE IF NOT EXISTS data (id INTEGER PRIMARY KEY AUTOINCREMENT, username varchar(64), password varchar(64), source varchar(64), key varchar(64)");
+            qry.prepare("CREATE TABLE IF NOT EXISTS data (id INTEGER PRIMARY KEY AUTOINCREMENT, username varchar(64), password varchar(64), source varchar(64), key varchar(64))");
             if(!qry.exec())
             {
                 QMessageBox::warning(this, tr("error::"), qry.lastError().text());
             }
         }
+        else
+        {
+            QMessageBox::warning(this, "Error", "Error here");
+        }
     }
     else
     {
-        qDebug() << "hi";
+        qDebug() << "Database already created..";
     }
-    */
 }
 
 QString UserKey = "";
