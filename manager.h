@@ -43,7 +43,7 @@ public:
     bool connOpen()                                             //open connection to the database
     {
         mydb=QSqlDatabase::addDatabase("QSQLITE");
-        mydb.setDatabaseName("C:/Qt/zDB/manager.db");           //db location
+        mydb.setDatabaseName(db_location);           //db location
 
         if(!mydb.open())
         {

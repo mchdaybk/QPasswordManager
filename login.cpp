@@ -17,15 +17,20 @@ login::login(QWidget *parent)
     setWindowIcon(QIcon("C:/Users/msaybek/Desktop/repository/QPasswordManager/key.png"));
     setWindowTitle("Q Password Manager");
 
-
-    if(!QFileInfo::exists("C:/Users/msaybek/Desktop/ZZZZ/database.db"))
+    //Creating database..for the first run
+    if(!QFileInfo::exists(db_location))
     {
         QSqlDatabase dbcreate = QSqlDatabase::addDatabase("QSQLITE");
-        dbcreate.setDatabaseName("C:/Users/msaybek/Desktop/ZZZZ/database.db");
+        dbcreate.setDatabaseName(db_location);
         if(dbcreate.open())
         {
             QSqlQuery qry;
-            qry.prepare("CREATE TABLE IF NOT EXISTS data (id INTEGER PRIMARY KEY AUTOINCREMENT, username varchar(64), password varchar(64), source varchar(64), key varchar(64))");
+            qry.prepare("CREATE TABLE IF NOT EXISTS data (id INTEGER PRIMARY KEY AUTOINCREMENT, username text, password text, source text, key text)"); //for the main database
+            if(!qry.exec())
+            {
+                QMessageBox::warning(this, tr("error::"), qry.lastError().text());
+            }
+            qry.prepare("CREATE TABLE IF NOT EXISTS logindata (id INTEGER PRIMARY KEY AUTOINCREMENT, userlogin text, passwdlogin text, key text)");     //for the login database
             if(!qry.exec())
             {
                 QMessageBox::warning(this, tr("error::"), qry.lastError().text());
@@ -38,7 +43,7 @@ login::login(QWidget *parent)
     }
     else
     {
-        qDebug() << "Database already created..";
+        qDebug() << "Databases already created..";
     }
 }
 

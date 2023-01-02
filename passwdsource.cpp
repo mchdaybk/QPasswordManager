@@ -40,3 +40,4 @@ void passwdsource::on_pushButton_clicked()
     //save process halt.
 }
 
+QString db_location = "C:/Users/msaybek/Desktop/ZZZZ/database.db";

@@ -1,6 +1,7 @@
 #ifndef CREATEUSER_H
 #define CREATEUSER_H
 
+#include "passwdsource.h"
 #include <QDialog>
 #include <QSqlDatabase>
 #include <QDebug>
@@ -26,7 +27,7 @@ class createuser : public QDialog
     bool connOpen()
     {
         dblogin=QSqlDatabase::addDatabase("QSQLITE");
-        dblogin.setDatabaseName("C:/Qt/zDB/manager.db");
+        dblogin.setDatabaseName(db_location);
         if(!dblogin.open())
         {
             qDebug() << "Failed to open the database";

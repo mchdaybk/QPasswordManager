@@ -8,6 +8,8 @@ namespace Ui {
 class passwdsource;
 }
 
+extern QString db_location;
+
 class passwdsource : public QDialog
 {
     Q_OBJECT

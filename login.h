@@ -1,10 +1,12 @@
 #ifndef LOGIN_H
 #define LOGIN_H
 
+#include "manager.h"
+#include "passwdsource.h"
 #include <QMainWindow>
 #include <QDialog>
 #include <QMessageBox>
-#include "manager.h"
+
 
 QT_BEGIN_NAMESPACE
 namespace Ui { class login; }
@@ -31,7 +33,7 @@ public:
     bool connOpen()
     {
         dblogin=QSqlDatabase::addDatabase("QSQLITE");
-        dblogin.setDatabaseName("C:/Qt/zDB/manager.db");
+        dblogin.setDatabaseName(db_location);
 
         if(!dblogin.open())
         {
