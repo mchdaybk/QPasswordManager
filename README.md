@@ -7,7 +7,7 @@ Password Manager App with Qt Creator.
 -Resources location should be set also. ".pro" file in line 35.
 
 Necessary Application Versions\
-/*/*/*/*/*/*/*|*\*\*\*\*\*\*\
+--------------------------------
 Qt Version : 6.3.2\
 Qt Creator Version : 9.0.1\
 OpenSSL Version : 3.0.7\
